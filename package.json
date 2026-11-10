@@ -1,0 +1,42 @@
+{
+  "name": "regaim-desktop",
+  "productName": "רגעים",
+  "version": "1.0.0",
+  "description": "Regaim – beat-synced memory clips from your photos and videos",
+  "main": "main.js",
+  "author": "Roei",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "sync": "node scripts/sync-app.js",
+    "dist": "electron-builder --win --publish never",
+    "release": "electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "6.6.2",
+    "ffmpeg-static": "5.2.0"
+  },
+  "devDependencies": {
+    "electron": "38.8.4",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "com.roei.regaim",
+    "productName": "Regaim",
+    "artifactName": "Regaim-Setup-${version}.${ext}",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "preload.js", "app/**/*", "package.json"],
+    "asarUnpack": ["node_modules/ffmpeg-static/**"],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "build/icon.png" },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "רגעים",
+      "uninstallDisplayName": "רגעים"
+    },
+    "publish": [{ "provider": "github", "owner": "Roei2p", "repo": "regaim-desktop", "releaseType": "release" }]
+  }
+}
