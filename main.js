@@ -95,7 +95,7 @@ ipcMain.handle('convert', async (e, { input, name }) => {
   const out = path.join(TMP_DIR, id + '.mp4');
   const args = ['-hide_banner', '-y', '-i', input,
     '-vf', "scale=w='min(1920,iw)':h='min(1920,ih)':force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2",
-    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', '-an', '-movflags', '+faststart', out];
+    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', out];
   return new Promise((resolve, reject) => {
     const p = spawn(ffmpegPath(), args, { windowsHide: true });
     let dur = 0, err = '';
