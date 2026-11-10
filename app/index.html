@@ -226,6 +226,10 @@ details.links p{margin:6px 0 0}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font:11px var(--mono);color:var(--mute)}
 .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-inline-end:5px;vertical-align:-1px}
 .tl{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}
+.tlh .hint{display:none}
+.tlctl{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.tlv{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mute)}.tlv svg{color:var(--teal)}.tlv input{width:110px}.tlv output,.tlz output{font:11px var(--mono);color:var(--amber);min-width:34px}
+.tlz{display:flex;align-items:center;gap:4px}.tlz .btn{padding:3px 10px;font-size:14px;line-height:1.2;min-width:30px}
 .tlin{position:relative;height:164px;min-width:100%}
 #wave{position:absolute;top:0;left:0;height:88px;cursor:pointer;touch-action:none}
 .sh{position:absolute;top:96px;height:64px;border-radius:6px;background:var(--raise) center/cover no-repeat;border:1px solid rgba(0,0,0,.5);cursor:pointer;padding:0;overflow:hidden}
@@ -290,6 +294,7 @@ html,body{height:100%}
 .ev-laugh{background:var(--amber)!important;color:#1d1405!important}.ev-cheer{background:#FF7A59!important;color:#1d0a05!important}.ev-sad{background:#7FA7FF!important;color:#06102a!important}
 .ev-surprise{background:#C08BFF!important;color:#14062a!important}.ev-smile{background:#E8C27A!important;color:#1d1405!important}.ev-speech{background:var(--teal)!important;color:#03140f!important}
 .mc{width:min(640px,100%)!important}
+.vbtn{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.vbtn .btn{padding:4px 9px;font-size:12px}
 .mch{display:flex;gap:12px;align-items:center}.mch img{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none;background:#000}.mch b{display:block;font-size:16px;word-break:break-all}
 .mch .mut,.mcu{color:var(--mute);font-size:12.5px}.mcs{font-size:15px!important;color:var(--fg)!important}
 .mctags{display:flex;gap:6px;flex-wrap:wrap}.mctags .chip{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--raise);border:1px solid var(--line)}
@@ -529,6 +534,10 @@ html,body{height:100%}
     <div class="tlh">
       <h3 id="h-tl">ציר זמן</h3><div class="chips" id="chips"></div>
       <span class="hint">גררו את הקווים בין הסצנות כדי לקצר או להאריך. הם נצמדים לביט.</span>
+      <div class="tlctl">
+        <label class="tlv" title="הקול המקורי של כל הסרטונים בקליפ"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>קול הסרטונים</span><input type="range" id="tlVol" min="0" max="100" value="35" aria-label="עוצמת הקול המקורי בכל הקליפ"><output id="tlVolO">35%</output></label>
+        <div class="tlz" role="group" aria-label="זום ציר הזמן"><button class="btn" id="tlZout" title="הקטנה (Ctrl + גלגלת, או מקש -)" aria-label="הקטנת ציר הזמן">−</button><button class="btn" id="tlZfit" title="כל הקליפ בתצוגה (מקש 0)">הכול</button><button class="btn" id="tlZin" title="הגדלה (Ctrl + גלגלת, או מקש +)" aria-label="הגדלת ציר הזמן">+</button><output id="tlZo">×1</output></div>
+      </div>
       <div class="legend"><span><i style="background:var(--mute)"></i>ביט</span><span><i style="background:var(--rose)"></i>בס</span><span><i style="background:var(--amber)"></i>תופים וקול</span><span><i style="background:var(--teal)"></i>גבוהים</span><span><i style="background:#fff"></i>דרופ</span></div>
     </div>
     <div class="tl" id="tl" dir="ltr"><div class="tlin" id="tlin"><canvas id="wave"></canvas><div id="strip"></div><div class="ph" id="ph"></div></div></div>
@@ -1306,8 +1315,8 @@ function soundMix(t){
   for(const s of P.shots){
     if(s.m.kind!=='video'||s.recap)continue;const b=s.m.base||s.m;if(!b.und||!b.und.sound)continue;
     const w=shotWeight(s,t);if(w<=0)continue;const vt=(s.vs||0)+(t-s.t0),vol=s.vol??1,ng=normGain(b);
-    let g=lvl*w*vol,bite=0;
-    if(s.bites&&S.origSound)for(const [x,y,lv] of s.bites){const k=vt<x?clamp(1-(x-vt)/.35,0,1):vt>y?clamp(1-(vt-y)/.45,0,1):1;bite=Math.max(bite,lv*k)}
+    let g=lvl*w*vol,bite=0;const boost=Math.min(1,lvl*2.7);
+    if(s.bites&&S.origSound&&boost>0)for(const [x,y,lv] of s.bites){const k=vt<x?clamp(1-(x-vt)/.35,0,1):vt>y?clamp(1-(vt-y)/.45,0,1):1;bite=Math.max(bite,lv*k*boost)}
     if(bite>0){g=Math.max(g,bite*w*vol);duck=Math.max(duck,bite*w)}
     if(lvl>0)bed=Math.max(bed,w*Math.min(1,lvl*1.6));
     want.set(b,Math.max(want.get(b)||0,g*ng*endFade));
@@ -2274,10 +2283,12 @@ function jumpShot(dir){
 }
 
 /* ================= timeline & inspector ================= */
-let PPS=30,STRIP=[];
+let PPS=30,STRIP=[],TLZ=1;
+const tlFit=()=>{const P=S.plan;return P?Math.max(($('#tl').clientWidth-2)/P.D,4):30};
+const TLZ_MAX=()=>Math.max(1,320/tlFit());
 function drawTimeline(){
   const P=S.plan,tl=$('#tl'),inn=$('#tlin');if(!P)return;const A=S.A;
-  PPS=Math.max((tl.clientWidth-2)/P.D,26);const W=Math.ceil(P.D*PPS),HH=88;inn.style.width=W+'px';
+  TLZ=clamp(TLZ,1,TLZ_MAX());PPS=tlFit()*TLZ;const W=Math.ceil(P.D*PPS),HH=88;$('#tlZo').textContent='×'+(TLZ<10?TLZ.toFixed(1).replace(/\.0$/,''):Math.round(TLZ));$('#tlZout').disabled=TLZ<=1.001;$('#tlZin').disabled=TLZ>=TLZ_MAX()-.001;inn.style.width=W+'px';
   const wv=$('#wave'),dpr=Math.min(window.devicePixelRatio||1,Math.max(1,15000/W));wv.width=Math.round(W*dpr);wv.height=Math.round(HH*dpr);wv.style.width=W+'px';
   const x=wv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,HH);
   x.font='500 10px "IBM Plex Sans Hebrew", sans-serif';x.textBaseline='top';
@@ -2317,7 +2328,14 @@ function drawTimeline(){
   layoutStrip();
 }
 function layoutStrip(){const P=S.plan;P.shots.forEach((s,i)=>{const o=STRIP[i];if(!o)return;o.b.style.left=(s.t0*PPS+1)+'px';o.b.style.width=Math.max(4,(s.t1-s.t0)*PPS-2)+'px';if(o.h)o.h.style.left=(s.t1*PPS)+'px'})}
-function updatePlayhead(t){const P=S.plan,D=P?P.D:0;$('#ph').style.left=(t*PPS)+'px';$('#tcur').textContent=fmt(t);$('#tdur').textContent=fmt(D);if(!SCRUB.drag)$('#scrub').value=D?Math.round(t/D*1000):0}
+/* zoom keeps the point you are looking at (the mouse, or the playhead) in the same place */
+function setZoom(z,anchorT,anchorX){
+  const P=S.plan;if(!P)return;const tl=$('#tl');z=clamp(z,1,TLZ_MAX());if(Math.abs(z-TLZ)<.001)return;
+  if(anchorT==null){anchorT=Pl.offset;anchorX=anchorT*PPS-tl.scrollLeft;if(anchorX<0||anchorX>tl.clientWidth)anchorX=tl.clientWidth/2}
+  TLZ=z;drawTimeline();updatePlayhead(Pl.offset);tl.scrollLeft=Math.max(0,anchorT*PPS-anchorX);
+}
+function updatePlayhead(t){const P=S.plan,D=P?P.D:0;$('#ph').style.left=(t*PPS)+'px';
+  if(TLZ>1.001&&Pl.playing&&!SCRUB.drag){const tl=$('#tl'),x=t*PPS-tl.scrollLeft;if(x>tl.clientWidth*.85||x<0)tl.scrollLeft=Math.max(0,t*PPS-tl.clientWidth*.15)}$('#tcur').textContent=fmt(t);$('#tdur').textContent=fmt(D);if(!SCRUB.drag)$('#scrub').value=D?Math.round(t/D*1000):0}
 function updateChips(){
   const P=S.plan,c=$('#chips');if(!P){c.innerHTML='';return}
   c.innerHTML=`<span class="ch">BPM <b>${Math.round(P.bpm)}</b></span><span class="ch"><b>${P.shots.length}</b> סצנות</span>`+(P.drop!=null?`<span class="ch r">דרופ <b>${fmt(P.drop)}</b></span>`:'')+(noRepeat(P)?'<span class="ch ok" title="אף תמונה ואף קטע וידאו לא מופיעים פעמיים">✓ בלי חזרות</span>':'<span class="ch r"><b>יש חזרה</b></span>');
@@ -2356,7 +2374,7 @@ function showInsp(){
     ${b.manualFocus||b.userTrack?'<button class="btn" data-a="rf">איפוס מיקוד</button>':''}
   </div>
   <div class="ifld"><span>מסגור הסצנה</span><div class="seg fr" role="radiogroup" aria-label="מסגור הסצנה">${['auto','all','bal','close'].map(k=>`<label><input type="radio" name="sframe" value="${k}"${(s.frame||'auto')===k?' checked':''}><span>${({auto:'כמו הקליפ',all:'מלא',bal:'מאוזן',close:'קרוב'})[k]}</span></label>`).join('')}</div></div>
-  ${vid&&b.und&&b.und.sound?`<div class="ifld"><label for="volR">הקול המקורי בסצנה</label><input type="range" id="volR" min="0" max="150" step="5" value="${Math.round((s.vol??1)*100)}"><output id="volO">${Math.round((s.vol??1)*100)}%</output></div>`:''}
+  ${vid&&b.und&&b.und.sound?`<div class="ifld"><label for="volR">הקול המקורי בסצנה</label><input type="range" id="volR" min="0" max="150" step="5" value="${Math.round((s.vol??1)*100)}"><output id="volO">${Math.round((s.vol??1)*100)}%</output><div class="vbtn"><button class="btn" id="volAll" title="אותה עוצמה לכל הסצנות עם סרטון">לכל הסצנות</button><button class="btn" id="volMute" title="השתקת הקול המקורי בסצנה הזו">השתקה</button><button class="btn" id="volReset" title="כל הסצנות חוזרות ל-100%">איפוס הכול</button></div></div>`:''}
   <label class="ifld">מעבר לסצנה<select id="trSel"${i===0?' disabled':''}>${trOpts}</select></label>
   ${vid&&vmax>.05?`<div class="ifld"><label for="vsR">איזה קטע מהסרטון</label><input type="range" id="vsR" min="0" max="${vmax.toFixed(2)}" step="0.05" value="${(s.vs||0).toFixed(2)}"><output id="vsO">${fmt(s.vs||0)}–${fmt((s.vs||0)+len)}</output></div><div class="warn" id="vsW" hidden>החלק הזה כבר בשימוש בסצנה אחרת. הוא יוזז לקטע פנוי.</div>`:''}
   ${s.hold?'<div class="warn">בסרטון אין מספיק חומר חדש לאורך הזה, אז הפריים האחרון מוחזק עד החיתוך. אפשר לקצר את הסצנה או להחליף.</div>':''}
@@ -2368,7 +2386,10 @@ function showInsp(){
   out.onclick=()=>{b.excluded=true;S.sel=-1;rebuild();toast('הפריט הוצא, הקליפ נבנה מחדש')};
   on('rf',()=>{snapshot();delete b.manualFocus;delete b.userTrack;commit(Pl.offset)});
   $('#trSel').onchange=e=>setTransition(i,e.target.value);
-  const vR=$('#volR');if(vR){let sn=false;vR.oninput=()=>{if(!sn){snapshot();sn=true}s.vol=+vR.value/100;$('#volO').textContent=vR.value+'%'};vR.onchange=()=>{S.plan.edited=true;markDirty()}}
+  const vR=$('#volR');if(vR){const vids=()=>S.plan.shots.filter(x=>x.m.kind==='video');
+    $('#volAll').onclick=()=>{snapshot();const v=s.vol??1;vids().forEach(x=>x.vol=v);S.plan.edited=true;markDirty();toast(`הקול המקורי ב-${Math.round(v*100)}% בכל ${vids().length} הסצנות עם סרטון`)};
+    $('#volMute').onclick=()=>{snapshot();s.vol=0;vR.value=0;$('#volO').textContent='0%';S.plan.edited=true;markDirty()};
+    $('#volReset').onclick=()=>{snapshot();vids().forEach(x=>x.vol=null);vR.value=100;$('#volO').textContent='100%';S.plan.edited=true;markDirty();toast('כל הסצנות חזרו ל-100%. העוצמה הכללית נקבעת ב"קול הסרטונים" בציר הזמן')};let sn=false;vR.oninput=()=>{if(!sn){snapshot();sn=true}s.vol=+vR.value/100;$('#volO').textContent=vR.value+'%'};vR.onchange=()=>{S.plan.edited=true;markDirty()}}
   box.querySelectorAll('input[name=sframe]').forEach(r=>r.onchange=e=>{e.stopPropagation();snapshot();s.frame=r.value==='auto'?null:r.value;commit(Pl.offset)});
   const vr=$('#vsR');if(vr){let snap=false;vr.oninput=()=>{if(!snap){snapshot();snap=true}s.vs=+vr.value;$('#vsO').textContent=`${fmt(s.vs)}–${fmt(s.vs+len)}`;const vU=usedVideoRanges(P,s).get(b)||[];$('#vsW').hidden=vU.every(r=>s.vs+len<=r[0]+.05||s.vs>=r[1]-.05);seekTo(s.t0+Math.min(.5,len/2))};vr.onchange=()=>commit(s.t0+Math.min(.5,len/2))}
   drawFocus(s);
@@ -2821,7 +2842,7 @@ function applySettingsUI(){
   $('#title').value=S.title||'';$('#subtitle').value=S.subtitle||'';$('#outroText').value=S.outroText||'';$('#outroSub').value=S.outroSub||'';$('#credits').value=S.credits||'';
   const v=Math.round(S.react*65);$('#react').value=v;$('#reactOut').textContent=v<25?'עדינה':v<75?'רגילה':'חזקה';
   for(const [id,k] of [['optBass','bassFx'],['optDrum','drumFx'],['optViz','viz'],['optPart','particles'],['optCap','captions'],['optGrain','grain'],['optAi','ai'],['optFaces','faces'],['optOnly','targetOnly'],['optSnd','origSound']]){const el=$('#'+id);if(el)el.checked=!!S[k]}
-  {const v=Math.round((S.origLevel??.35)*100);$('#origLvl').value=v;$('#origOut').textContent=v===0?'כבוי':v<25?'עדין':v<60?'ברקע':'בולט'}
+  {const v=Math.round((S.origLevel??.35)*100);$('#origLvl').value=v;$('#tlVol').value=v;$('#tlVolO').textContent=v+'%';$('#origOut').textContent=v===0?'כבוי':v<25?'עדין':v<60?'ברקע':'בולט'}
   syncPlaceholders();
 }
 async function openProject(id){
@@ -2989,6 +3010,11 @@ $('#vary').onclick=()=>{if(!S.plan)return;S.seed++;S.sel=-1;rebuild();toast('ו�
 $('#exMore').onclick=()=>{EXN++;buildExamples()};
 $('#exportBtn').onclick=exportClip;
 $('#mcX').onclick=closeCard;$('#mcard').addEventListener('click',e=>{if(e.target.id==='mcard')closeCard()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#mcard').hidden)closeCard()});
+$('#tlZin').onclick=()=>setZoom(TLZ*1.6);$('#tlZout').onclick=()=>setZoom(TLZ/1.6);$('#tlZfit').onclick=()=>setZoom(1);
+$('#tl').addEventListener('wheel',e=>{if(!(e.ctrlKey||e.metaKey)||!S.plan)return;e.preventDefault();const tl=$('#tl'),r=tl.getBoundingClientRect(),ax=e.clientX-r.left,at=(ax+tl.scrollLeft)/PPS;setZoom(TLZ*Math.exp(-e.deltaY*.0025),at,ax)},{passive:false});
+document.addEventListener('keydown',e=>{if(!S.plan||e.ctrlKey||e.metaKey||e.altKey||(e.target.closest&&e.target.closest('input,textarea,select,[contenteditable]')))return;if(e.key==='+'||e.key==='='){setZoom(TLZ*1.6);e.preventDefault()}else if(e.key==='-'||e.key==='_'){setZoom(TLZ/1.6);e.preventDefault()}else if(e.key==='0'){setZoom(1);e.preventDefault()}});
+function setOrigLevel(v,from){S.origLevel=v/100;$('#origLvl').value=v;$('#tlVol').value=v;$('#origOut').textContent=origTxt(v);$('#tlVolO').textContent=v+'%';if(from==='end')markDirty()}
+$('#tlVol').oninput=e=>setOrigLevel(+e.target.value);$('#tlVol').onchange=()=>markDirty();
 $('#pjOpen').onclick=openProjects;$('#pjClose').onclick=closeProjects;$('#pjNew').onclick=newProject;$('#pjExport').onclick=exportProject;
 $('#pjImport').onchange=e=>{const f=e.target.files[0];e.target.value='';importProject(f)};
 $('#projSheet').addEventListener('click',e=>{if(e.target.id==='projSheet')closeProjects()});
@@ -3027,7 +3053,7 @@ $('#optDrum').onchange=e=>{S.drumFx=e.target.checked;reRender()};
 $('#optViz').onchange=e=>{S.viz=e.target.checked;reRender()};
 $('#optSnd').onchange=e=>{S.origSound=e.target.checked;if(S.plan)look()};
 const origTxt=v=>v===0?'כבוי':v<25?'עדין':v<60?'ברקע':'בולט';
-$('#origLvl').oninput=e=>{const v=+e.target.value;S.origLevel=v/100;$('#origOut').textContent=origTxt(v)};
+$('#origLvl').oninput=e=>setOrigLevel(+e.target.value);
 $('#optPart').onchange=e=>{S.particles=e.target.checked;reRender()};
 $('#optGrain').onchange=e=>{S.grain=e.target.checked;reRender()};
 $('#optCap').onchange=e=>{S.captions=e.target.checked;look()};

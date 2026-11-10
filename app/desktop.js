@@ -58,6 +58,24 @@
     document.head.append(css);
     const b = document.createElement('button'); b.className = 'btn'; b.id = 'dkSet'; b.textContent = 'הגדרות';
     acts.prepend(b);
+    // always-visible update button: checks, shows progress, installs when ready
+    const ub = document.createElement('button'); ub.className = 'btn'; ub.id = 'dkUpd'; ub.textContent = 'בדיקת עדכונים';
+    acts.prepend(ub);
+    let last = { status: 'idle' };
+    const paint = (s) => {
+      last = s || last; const st = last.status;
+      ub.classList.toggle('hot', st === 'ready');
+      ub.disabled = st === 'checking' || st === 'downloading';
+      ub.textContent = st === 'checking' ? 'בודק עדכונים…' : st === 'downloading' ? `מוריד עדכון ${last.p ? Math.round(last.p * 100) + '%' : '…'}` : st === 'ready' ? `התקנת גרסה ${last.version}` : st === 'latest' ? '✓ מעודכן' : st === 'error' ? 'בדיקת עדכונים (נכשלה)' : 'בדיקת עדכונים';
+      if (st === 'latest') setTimeout(() => { if (last.status === 'latest') ub.textContent = 'בדיקת עדכונים'; }, 6000);
+    };
+    N.info().then((i) => { ub.title = 'רגעים ' + i.version + (i.packaged ? '' : ' (גרסת פיתוח, עדכונים רק בגרסה מותקנת)'); });
+    N.updateState().then(paint);
+    ub.onclick = async () => {
+      if (last.status === 'ready') { ub.textContent = 'מתקין…'; await N.installUpdate(); return; }
+      const i = await N.info(); if (!i.packaged) { ub.textContent = 'עדכונים רק בגרסה מותקנת'; return; }
+      paint({ status: 'checking' }); try { await N.checkUpdates(); } catch (e) { paint({ status: 'error' }); }
+    };
     const sh = document.createElement('div'); sh.className = 'sheet'; sh.hidden = true; sh.dir = 'rtl'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-modal', 'true');
     sh.innerHTML = `<div class="dk"><div style="display:flex;justify-content:space-between;align-items:center"><h3>הגדרות</h3><button class="btn" id="dkX" aria-label="סגירה">×</button></div>
       <h4>גרסה</h4><div class="row"><span id="dkVer" class="mut"></span><span id="dkUp" class="mut"></span><button class="btn" id="dkChk">בדיקת עדכונים</button></div>
@@ -69,7 +87,7 @@
     const $ = (id) => document.getElementById(id);
     const ks = async () => { const s = await N.keyStatus(); $('dkKs').textContent = s.has ? '✓ מפתח שמור' : 'אין מפתח שמור'; $('dkKs').className = s.has ? 'ok' : 'mut'; };
     const upTxt = (s) => ({ checking: 'בודק…', downloading: `מוריד גרסה ${s.version || ''} ${s.p ? Math.round(s.p * 100) + '%' : ''}`, ready: `גרסה ${s.version} מוכנה, תותקן בסגירה`, latest: '✓ זו הגרסה העדכנית', error: 'הבדיקה נכשלה, ננסה שוב מאוחר יותר' })[s.status] || '';
-    N.onUpdate((s) => { $('dkUp').textContent = upTxt(s); if (s.status === 'ready' || s.status === 'downloading') b.dataset.u = '1'; });
+    N.onUpdate((s) => { $('dkUp').textContent = upTxt(s); paint(s); });
     b.onclick = async () => { sh.hidden = false; const i = await N.info(); $('dkVer').textContent = 'רגעים ' + i.version + (i.packaged ? '' : ' (פיתוח)'); $('dkUp').textContent = upTxt(await N.updateState()); ks(); };
     $('dkX').onclick = () => (sh.hidden = true);
     sh.addEventListener('click', (e) => { if (e.target === sh) sh.hidden = true; });

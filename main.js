@@ -162,6 +162,7 @@ function setupUpdates() {
     if (r.response === 0) setImmediate(() => autoUpdater.quitAndInstall());
   });
   ipcMain.handle('update-check', () => autoUpdater.checkForUpdates().catch(() => null));
+  ipcMain.handle('update-install', () => { setImmediate(() => autoUpdater.quitAndInstall(false, true)); return true; });
   setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 4000);
   setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), 4 * 3600 * 1000);
 }

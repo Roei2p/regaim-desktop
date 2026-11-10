@@ -21,5 +21,6 @@ contextBridge.exposeInMainWorld('regaimNative', {
   claudeJson: (prompt, images, tier) => ipcRenderer.invoke('claude-json', { prompt, images, tier }),
   updateState: () => ipcRenderer.invoke('update-state'),
   checkUpdates: () => ipcRenderer.invoke('update-check'),
+  installUpdate: () => ipcRenderer.invoke('update-install'),
   onUpdate: (cb) => { updateCb = cb; }
 });
