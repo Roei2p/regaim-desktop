@@ -10,4 +10,4 @@
 - `app/` – העורך (אותו עורך כמו בגרסת הדפדפן). `app/index.html` נבנה מהמקור עם `node scripts/sync-app.js path/to/clip-studio.html`.
 - `main.js` – חלון, פרוטוקול `app://`, שמירה לתיקייה, FFmpeg מקומי, Claude עם מפתח API של המשתמש, עדכונים.
 - `npm start` להרצה מקומית, `npm run dist` לבניית מתקין.
-- **גרסה חדשה:** מעלים את `version` ב-`package.json`, ואז `git tag vX.Y.Z && git push --tags`. GitHub Actions בונה ומפרסם, והתוכנות המותקנות מתעדכנות.
+- **גרסה חדשה:** מעלים את `version` ב-`package.json` ודוחפים ל-main. GitHub Actions בונה, מפרסם Release בשם vX.Y.Z, והתוכנות המותקנות מתעדכנות.

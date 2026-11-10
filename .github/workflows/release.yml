@@ -1,8 +1,9 @@
 name: Build and publish Windows installer
 
+# A new version is published when the version in package.json changes on main.
 on:
   push:
-    tags: ['v*']
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -13,16 +14,29 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Is this version already released?
+        id: ver
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          v=$(node -p "require('./package.json').version")
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          if gh release view "v$v" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then echo "skip=true" >> "$GITHUB_OUTPUT"; echo "v$v already published"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-node@v4
+        if: steps.ver.outputs.skip == 'false'
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Build installer and publish the release
+        if: steps.ver.outputs.skip == 'false'
+      - name: Build installer and publish release v${{ steps.ver.outputs.version }}
+        if: steps.ver.outputs.skip == 'false'
         run: npx electron-builder --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
+        if: steps.ver.outputs.skip == 'false'
         with:
           name: installer
           path: |
