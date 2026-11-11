@@ -297,9 +297,14 @@ html,body{height:100%}
 .vbtn{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.vbtn .btn{padding:4px 9px;font-size:12px}
 .mch{display:flex;gap:12px;align-items:center}.mch img{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none;background:#000}.mch b{display:block;font-size:16px;word-break:break-all}
 .mch .mut,.mcu{color:var(--mute);font-size:12.5px}.mcs{font-size:15px!important;color:var(--fg)!important}
-.mctags{display:flex;gap:6px;flex-wrap:wrap}.mctags .chip{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--raise);border:1px solid var(--line)}
+.mctags{display:flex;gap:6px;flex-wrap:wrap}.mctags .chip{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--raise);border:1px solid var(--line);color:var(--fg)}
 #mcGraph{width:100%;height:150px;border-radius:10px;background:var(--raise)}
 .mclg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--mute)}.mclg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:-1px}.mclg i.br{background:rgba(242,169,59,.25);border-top:2px solid var(--amber)}
+.mgh{grid-column:1/-1;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--mute);padding:4px 2px 0;border-top:1px solid var(--line);margin-top:2px}
+.mgh:first-child{border-top:0;margin-top:0}.mgh b{font:600 10px var(--mono);background:var(--raise);color:var(--amber);border-radius:5px;padding:1px 5px}.mgh span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mgh i{font:10px var(--mono);font-style:normal}
+.mi .dt.est{color:#ffd9a0}
+.mi.drg{opacity:.35}.mi.dov{outline:2px dashed var(--amber);outline-offset:2px}
+.mcd{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--mute)}.mcd input{background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:5px 8px;color:inherit;font:12px var(--mono)}
 .mhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:-4px}
 .mbox{flex:1 1 140px;min-height:110px;overflow:auto;border-radius:10px;background:rgba(0,0,0,.18);padding:6px;overscroll-behavior:contain}
 .mbox:empty,.mbox:has(.mgrid:empty){display:grid;place-items:center}
@@ -398,7 +403,7 @@ html,body{height:100%}
     </div>
     <section class="pane pm" role="tabpanel" id="p-media" aria-labelledby="t-media">
       <label class="drop" id="dropZone">
-          <input class="vh" type="file" id="fMedia" multiple accept="image/*,video/*">
+          <input class="vh" type="file" id="fMedia" multiple accept="image/*,video/*,.json">
           <strong>גררו לכאן תמונות וסרטונים</strong>
           <span>או לחצו לבחירה מהמכשיר</span>
           <small>JPG · PNG · WEBP · MP4 · MOV · HEVC</small>
@@ -1333,6 +1338,7 @@ function smartTransition(P,prev,s,r){
   const cd=s.m.stats&&prev.m.stats?colorDist(s.m,prev.m):.2,sadIn=(mIn.und&&(mIn.und.events||[]).some(e=>e.type==='sad'))||(mIn.und&&mIn.und.llm&&/sad|emotional|love/.test(mIn.und.llm.mood));
   const rise=s.secStart&&s.inten>prev.inten+.1;
   if(s.isDrop||rise)return{type:hit?'cut':'blurx',why:hit?'חיתוך על המכה בתחילת חלק חדש בשיר':'מעבר רך לחלק חדש בשיר'};
+  if(mIn.date&&mOut.date&&Math.abs(mIn.date-mOut.date)>45*60000)return{type:'cross',slow:true,why:new Date(mIn.date).toDateString()!==new Date(mOut.date).toDateString()?'יום חדש בציר הזמן, דיזולב ארוך':'אירוע חדש בציר הזמן, דיזולב ארוך'};
   if(sadIn||s.inten<.32)return{type:'cross',slow:true,why:sadIn?'רגע מרגש, דיזולב ארוך':'מוזיקה שקטה, דיזולב ארוך'};
   if(hit&&s.inten>.55&&(eIn>.55||cd>.32))return{type:'cut',why:eIn>.55?'חיתוך נקי על הביט אל רגע חזק':'חיתוך על הביט בין שתי סצנות שונות'};
   if(cd>.33)return{type:'blurx',why:'סצנות בצבעים שונים, מעבר דרך טשטוש'};
@@ -1689,34 +1695,119 @@ function fitHandles(P){
   });
 }
 /* ================= when was it filmed: EXIF, video header, file name, then file date ================= */
+/* ================= when was it filmed: camera data, video header, Google Takeout, file name, then the content itself ================= */
+const DATE_SRC_HE={exif:'לפי נתוני המצלמה',meta:'לפי נתוני הסרטון',takeout:'לפי Google Takeout',name:'לפי שם הקובץ',content:'שובץ לפי תוכן דומה',manual:'נקבע ידנית',file:'לפי תאריך הקובץ (לא בטוח)'};
+const SURE_SRC=new Set(['exif','meta','takeout','name','manual']);
+const okDate=t=>t&&t>946684800000&&t<Date.now()+864e5;
+function exifDate(u){
+  // real EXIF: DateTimeOriginal (+ its time-zone offset when the phone wrote one)
+  if(u[0]!==0xFF||u[1]!==0xD8)return null;
+  let i=2;
+  while(i+4<u.length&&u[i]===0xFF){
+    const mk=u[i+1],len=(u[i+2]<<8)|u[i+3];
+    if(mk===0xE1&&u[i+4]===0x45&&u[i+5]===0x78&&u[i+6]===0x69&&u[i+7]===0x66){
+      const T=i+10,dv=new DataView(u.buffer,u.byteOffset),le=u[T]===0x49;
+      const g16=o=>dv.getUint16(T+o,le),g32=o=>dv.getUint32(T+o,le),str=(o,n)=>{let s='';for(let k=0;k<n&&u[T+o+k];k++)s+=String.fromCharCode(u[T+o+k]);return s};
+      const tags=ifd=>{const out={};if(T+ifd+2>u.length)return out;const n=g16(ifd);for(let k=0;k<n;k++){const e=ifd+2+k*12;if(T+e+12>u.length)break;const tag=g16(e),type=g16(e+2),cnt=g32(e+4);out[tag]=type===2?(cnt<=4?str(e+8,cnt):str(g32(e+8),cnt)):g32(e+8)}return out};
+      try{
+        const t0=tags(g32(4)),ex=t0[0x8769]?tags(t0[0x8769]):{};
+        const raw=ex[0x9003]||ex[0x9004]||t0[0x0132],off=ex[0x9011]||ex[0x9010]||'';
+        const m=raw&&raw.match(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
+        if(m){let t;if(/^[+-]\d{2}:\d{2}$/.test(off.trim()))t=Date.parse(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}${off.trim()}`);else t=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]).getTime();if(okDate(t))return t}
+      }catch(e){}
+      return null;
+    }
+    if(mk===0xDA)break;i+=2+len;
+  }
+  return null;
+}
 function dateFromName(n){
   let m=n.match(/(20\d{2})[-_.]?(\d{2})[-_.]?(\d{2})(?:[^\d]{1,4}(\d{2})[-_.:]?(\d{2})[-_.:]?(\d{2}))?/);
-  if(m){const y=+m[1],mo=+m[2],d=+m[3];if(mo>=1&&mo<=12&&d>=1&&d<=31){const t=new Date(y,mo-1,d,+(m[4]||12),+(m[5]||0),+(m[6]||0)).getTime();if(t>946684800000&&t<Date.now()+864e5)return t}}
-  m=n.match(/\b(1[5-9]\d{8})(\d{3})?\b/);if(m){const t=+m[1]*1000;if(t<Date.now()+864e5)return t}
+  if(m){const y=+m[1],mo=+m[2],d=+m[3];if(mo>=1&&mo<=12&&d>=1&&d<=31){const t=new Date(y,mo-1,d,+(m[4]||12),+(m[5]||0),+(m[6]||0)).getTime();if(okDate(t))return t}}
+  m=n.match(/(?:^|[^\d])(\d{2})[-_.](\d{2})[-_.](20\d{2})(?:[^\d]{1,4}(\d{2})[-_.:](\d{2})(?:[-_.:](\d{2}))?)?/);
+  if(m){const d=+m[1],mo=+m[2],y=+m[3];if(mo>=1&&mo<=12&&d>=1&&d<=31){const t=new Date(y,mo-1,d,+(m[4]||12),+(m[5]||0),+(m[6]||0)).getTime();if(okDate(t))return t}}
+  m=n.match(/(?:^|[^\d])(1[5-9]\d{8})(\d{3})?(?:[^\d]|$)/);if(m){const t=+m[1]*1000;if(okDate(t))return t}
   return null;
 }
 async function mediaDate(f){
-  const ok=t=>t&&t>946684800000&&t<Date.now()+864e5;
+  const base={fileDate:f.lastModified||Date.now()};
   try{
     const sz=f.size,rd=async(a,b)=>new Uint8Array(await f.slice(a,b).arrayBuffer());
     const head=await rd(0,Math.min(sz,393216));
     const txt=u=>{let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return s};
     if(!isVideoFile(f)){
-      const s=txt(head),all=[...s.matchAll(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/g)].map(m=>new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]).getTime()).filter(ok);
-      if(all.length)return{date:Math.min(...all),dateSrc:'exif'};
+      const t=exifDate(head);if(t)return{...base,date:t,dateSrc:'exif'};
+      const s=txt(head),all=[...s.matchAll(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/g)].map(m=>new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6]).getTime()).filter(okDate);
+      if(all.length)return{...base,date:Math.min(...all),dateSrc:'exif'};
     }else{
       const parts=[head];if(sz>head.length)parts.push(await rd(Math.max(head.length,sz-4194304),sz));
       for(const u of parts){
         const s=txt(u),iso=s.match(/(20\d{2})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([+-]\d{2}:?\d{2}|Z)?/);
-        if(iso){const t=Date.parse(`${iso[1]}-${iso[2]}-${iso[3]}T${iso[4]}:${iso[5]}:${iso[6]}${iso[7]?iso[7].replace(/^([+-]\d{2})(\d{2})$/,'$1:$2'):''}`);if(ok(t))return{date:t,dateSrc:'meta'}}
+        if(iso){const t=Date.parse(`${iso[1]}-${iso[2]}-${iso[3]}T${iso[4]}:${iso[5]}:${iso[6]}${iso[7]?iso[7].replace(/^([+-]\d{2})(\d{2})$/,'$1:$2'):''}`);if(okDate(t))return{...base,date:t,dateSrc:'meta'}}
         const k=s.indexOf('mvhd');
-        if(k>=0&&k+20<u.length){const dv=new DataView(u.buffer,u.byteOffset);const ver=u[k+4];const sec=ver===1?Number(dv.getBigUint64(k+8)):dv.getUint32(k+8);const t=(sec-2082844800)*1000;if(ok(t))return{date:t,dateSrc:'meta'}}
+        if(k>=0&&k+20<u.length){const dv=new DataView(u.buffer,u.byteOffset);const ver=u[k+4];const sec=ver===1?Number(dv.getBigUint64(k+8)):dv.getUint32(k+8);const t=(sec-2082844800)*1000;if(okDate(t))return{...base,date:t,dateSrc:'meta'}}
       }
     }
   }catch(e){}
-  const n=dateFromName(f.name||'');if(n)return{date:n,dateSrc:'name'};
-  return{date:f.lastModified||Date.now(),dateSrc:'file'};
+  const n=dateFromName(f.name||'');if(n)return{...base,date:n,dateSrc:'name'};
+  return{...base,date:base.fileDate,dateSrc:'file'};
 }
+/* Google Takeout puts the real date in a .json next to each photo */
+const SIDE=new Map();
+const sideKey=n=>String(n||'').toLowerCase().replace(/\(\d+\)(?=\.[^.]+$)/,'').trim();
+async function readSidecars(files){
+  let n=0;
+  for(const f of files){try{const o=JSON.parse(await f.text());const ts=+(o.photoTakenTime&&o.photoTakenTime.timestamp||o.creationTime&&o.creationTime.timestamp);if(o.title&&ts){SIDE.set(sideKey(o.title),ts*1000);n++}}catch(e){}}
+  return n;
+}
+function applySidecars(){
+  let n=0;for(const m of S.media){if(['exif','meta','manual'].includes(m.dateSrc))continue;const t=SIDE.get(sideKey(m.name));if(t&&okDate(t)){m.date=t;m.dateSrc='takeout';n++}}
+  return n;
+}
+/* items with no trustworthy date are placed next to the dated item they look most like */
+function hashDist(a,b){if(!a||!b)return 64;let h=0;for(let k=0;k<64;k++)if(a[k]!==b[k])h++;return h}
+function looks(m){const b=m.base||m;if(b.kind==='image')return b.stats?[b.stats]:[];return(b.moments||[]).map(mo=>mo.stats).filter(Boolean).concat(b.stats?[b.stats]:[])}
+function likeness(a,b){
+  let best=0;for(const x of looks(a))for(const y of looks(b)){if(!x.rgb||!y.rgb)continue;const cd=Math.hypot(x.rgb[0]-y.rgb[0],x.rgb[1]-y.rgb[1],x.rgb[2]-y.rgb[2])/441,hd=hashDist(x.hash,y.hash)/64;best=Math.max(best,1-cd*2.2-hd*.9)}
+  const pa=(a.und&&(a.und.img?a.und.img.nf:Math.max(0,...(a.und.line||[]).map(p=>p.nf||0))))||0,pb=(b.und&&(b.und.img?b.und.img.nf:Math.max(0,...(b.und.line||[]).map(p=>p.nf||0))))||0;
+  if(pa&&pb)best+=.08;
+  return best;
+}
+function placeUndated(){
+  const sure=S.media.filter(m=>SURE_SRC.has(m.dateSrc)&&m.stats);let n=0;
+  if(!sure.length)return 0;
+  const lo=Math.min(...sure.map(m=>m.date)),hi=Math.max(...sure.map(m=>m.date));
+  for(const m of S.media){
+    if(SURE_SRC.has(m.dateSrc)||!m.stats)continue;
+    const fd=m.fileDate||m.date;let best=null,bv=.42;
+    for(const s of sure){const v=likeness(m,s);if(v>bv){bv=v;best=s}}
+    if(best){m.date=best.date+1000+(m.id%997);m.dateSrc='content';m.dateRef=best.id;n++}
+    else{m.date=fd>=lo-864e5&&fd<=hi+864e5?fd:hi+1000+(m.id%997);m.dateSrc='file';delete m.dateRef}
+  }
+  return n;
+}
+/* the detected timeline: days and events (a gap of 45 minutes starts a new event) */
+function timelineGroups(items){
+  const arr=[...items].sort((a,b)=>(a.date||0)-(b.date||0)),out=[];let cur=null;
+  for(const m of arr){const d=new Date(m.date||0);
+    if(!cur||m.date-cur.t1>45*60000||d.toDateString()!==new Date(cur.t1).toDateString()){cur={t0:m.date,t1:m.date,items:[]};out.push(cur)}
+    cur.items.push(m);cur.t1=m.date}
+  return out;
+}
+const groupOf=(m,groups)=>groups.findIndex(g=>g.items.includes(m.base||m));
+function groupLabel(g){
+  const a=new Date(g.t0),b=new Date(g.t1),hm=d=>d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+  const day=a.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:a.getFullYear()!==new Date().getFullYear()?'numeric':undefined});
+  const part=a.getHours()<5?'לילה':a.getHours()<12?'בוקר':a.getHours()<17?'צהריים':a.getHours()<21?'ערב':'לילה';
+  return `${day} · ${part} · ⁦${hm(a)}${g.t1-g.t0>60000?'–'+hm(b):''}⁩`;
+}
+/* manual order: dropping an item before another gives it a time just before it */
+function moveBefore(m,target){
+  const arr=[...S.media].sort((a,b)=>a.date-b.date).filter(x=>x!==m),k=arr.indexOf(target);if(k<0)return;
+  const prev=arr[k-1];m.date=prev&&target.date-prev.date>2?Math.round((prev.date+target.date)/2):target.date-1000;m.dateSrc='manual';delete m.dateRef;
+}
+function moveAfterAll(m){const mx=Math.max(...S.media.filter(x=>x!==m).map(x=>x.date||0));m.date=mx+1000;m.dateSrc='manual'}
+function orderChanged(msg){updateGrid();if(S.plan&&!S.demo){if(STY().smooth){rebuild(true);toast(msg||'הסדר עודכן, והקליפ נבנה מחדש לפי ציר הזמן')}else toast('הסדר עודכן. במצב "חלקים ונקיים" הקליפ נבנה לפי ציר הזמן')}markDirty()}
 /* ================= learning the material as soon as it arrives ================= */
 const LEARN={busy:null,done:0,total:0};
 function learnAll(){
@@ -1735,7 +1826,7 @@ function learnAll(){
         for(const m of todo){learnUI();try{await understand(m);if(S.ai&&m.kind==='video')await aiVideo(m)}catch(e){console.warn('understand',e);m.undFail=true}LEARN.done++;learnUI();updateGrid();await tick()}
       }
       LEARN.phase='';
-      scoreAll();dedupe();dedupeVideos();updateGrid();
+      scoreAll();dedupe();dedupeVideos();applySidecars();placeUndated();updateGrid();
     }finally{LEARN.busy=null;LEARN.done=0;LEARN.total=0;learnUI()}
   })();
   return LEARN.busy;
@@ -2433,6 +2524,7 @@ function openCard(m){
   const local=evs.length?evs.slice(0,6).map(e=>`${EV_HE[e.type]}${b.kind==='video'?' '+tSpan(e.t0,e.t1):''}`).join(' · '):'';
   box.innerHTML=`<div class="mch"><img alt=""><div><b></b><span class="mut">${facts.join(' · ')}</span></div></div>
     <p class="mcs"></p><div class="mctags"></div>
+    ${b.date?`<div class="mcd"><span>מקום בציר הזמן: ${DATE_SRC_HE[b.dateSrc]||''}${b.dateSrc==='content'&&b.dateRef?' ('+(S.media.find(x=>x.id===b.dateRef)||{}).name+')':''}</span><input type="datetime-local" id="mcDate" step="1" aria-label="תאריך ושעת צילום"><button class="btn" id="mcDateSave">עדכון</button></div>`:''}
     ${b.kind==='video'&&u&&u.line&&u.line.length?'<canvas id="mcGraph" height="150" aria-label="רגש, סאונד ותנועה לאורך הסרטון"></canvas><div class="mclg"><span><i style="background:var(--amber)"></i>רגש</span><span><i style="background:var(--teal)"></i>עוצמת סאונד</span><span><i style="background:#8a7fa0"></i>תנועה</span><span><i class="br"></i>הקטע שבקליפ</span></div>':''}
     <p class="mut mcu">${!u?'עוד לא נלמד. זה יקרה אוטומטית ברקע.':used.length?`בקליפ: ${used.map(s=>b.kind==='video'?`${tSpan(s.vs||0,(s.vs||0)+(s.t1-s.t0))} מהסרטון, בזמן \u2066${fmt(s.t0)}\u2069`:`בזמן ${fmt(s.t0)}`).join(' · ')}`:(S.plan?'לא נכנס לקליפ הנוכחי':'')}</p>
     <div class="acts"><button class="btn" id="mcEx"></button><button class="btn" id="mcGo"${used.length?'':' hidden'}>לסצנה בציר הזמן</button></div>`;
@@ -2443,6 +2535,8 @@ function openCard(m){
   if(llm){if(llm.setting)chips.push([llm.setting,'']);for(const t of llm.tags||[])chips.push([t,''])}
   if(b.dup)chips.push(['כפול, סונן','']);if(llm&&llm.skip)chips.push(['Claude: צילום מקרי','']);
   chips.forEach(([t,c])=>{const x=document.createElement('span');x.className='chip '+c;x.textContent=t;tg.append(x)});
+  const di=$('#mcDate');if(di){const d=new Date(b.date),pad=x=>String(x).padStart(2,'0');di.value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    $('#mcDateSave').onclick=()=>{const t=new Date(di.value).getTime();if(!okDate(t)){toast('תאריך לא תקין');return}b.date=t;b.dateSrc='manual';delete b.dateRef;placeUndated();orderChanged('התאריך עודכן, והקליפ נבנה מחדש לפי ציר הזמן');openCard(b)}}
   const ex=$('#mcEx');ex.textContent=b.excluded?'להחזיר לקליפ':'להוציא מהקליפ';ex.onclick=()=>{toggleExclude(b);openCard(b)};
   $('#mcGo').onclick=()=>{closeCard();const s=used[0];if(s){S.sel=S.plan.shots.indexOf(s);showInsp();seekTo(s.t0+.4)}};
   sh.hidden=false;
@@ -2459,19 +2553,24 @@ function closeCard(){$('#mcard').hidden=true}
 function updateGrid(){
   const g=$('#mgrid');g.innerHTML='';
   const used=S.plan?new Set(S.plan.shots.map(s=>s.m.base||s.m)):null;
-  [...S.media].sort((a,b)=>(a.date||0)-(b.date||0)).forEach(m=>{
+  const groups=S.demo?[{items:[...S.media]}]:timelineGroups(S.media);let DRAG=null;
+  groups.forEach((gp,gi)=>{if(!S.demo&&gp.t0!=null){const h=document.createElement('div');h.className='mgh';h.innerHTML=`<b>${gi+1}</b><span></span><i>${gp.items.length}</i>`;h.querySelector('span').textContent=groupLabel(gp);g.append(h)}
+  gp.items.forEach(m=>{
     const b=document.createElement('button');b.className='mi'+(m.excluded?' off':m.dup?' dup':'')+(!m.stats&&!S.demo?' lrn':'');
     b.dataset.l=m.excluded?'מוחרג':m.dup?'כפול':'';
     const nf=m.faces&&m.faces.length?m.faces.length:(m.ai&&m.ai.faces?m.ai.faces.length:0);
-    b.innerHTML=`<img alt="" src="${m.thumb||''}">`+(m.kind==='video'?`<span class="b">${m.converted?'MP4 · ':''}${fmt(m.dur||0)}</span>`:'')+(m.magic>=.75&&!m.dup&&!m.excluded?'<span class="st" title="רגע קסום"></span>':'')+(nf?`<span class="fc" title="פנים שזוהו">${nf}☺</span>`:'')+(S.target&&hasTarget(m)?'<span class="tg2" title="המושא מופיע כאן">◎</span>':'')+(m.date&&!S.demo?`<span class="dt">${dateLbl(m.date)}</span>`:'')+(topEvent(m)?`<span class="ev ev-${topEvent(m).type}">${EV_HE[topEvent(m).type]}</span>`:'');
-    b.title=(m.und&&m.und.llm&&m.und.llm.summary?m.und.llm.summary+' · ':'')+(m.date?`צולם ${new Date(m.date).toLocaleString('he-IL',{dateStyle:'medium',timeStyle:'short'})}${m.dateSrc==='file'?' (לפי תאריך הקובץ)':''} · `:'')+(m.ai&&m.ai.desc?m.ai.desc+' · ':'')+(m.converted?'הומר ל-MP4 · ':'')+'לחצו לכרטיס ההבנה';
+    b.innerHTML=`<img alt="" src="${m.thumb||''}">`+(m.kind==='video'?`<span class="b">${m.converted?'MP4 · ':''}${fmt(m.dur||0)}</span>`:'')+(m.magic>=.75&&!m.dup&&!m.excluded?'<span class="st" title="רגע קסום"></span>':'')+(nf?`<span class="fc" title="פנים שזוהו">${nf}☺</span>`:'')+(S.target&&hasTarget(m)?'<span class="tg2" title="המושא מופיע כאן">◎</span>':'')+(m.date&&!S.demo?`<span class="dt${SURE_SRC.has(m.dateSrc)?'':' est'}">${SURE_SRC.has(m.dateSrc)?'':'~'}${dateLbl(m.date)}</span>`:'')+(topEvent(m)?`<span class="ev ev-${topEvent(m).type}">${EV_HE[topEvent(m).type]}</span>`:'');
+    b.title=(m.und&&m.und.llm&&m.und.llm.summary?m.und.llm.summary+' · ':'')+(m.date?`צולם ${new Date(m.date).toLocaleString('he-IL',{dateStyle:'medium',timeStyle:'short'})} (${DATE_SRC_HE[m.dateSrc]||''}) · גררו כדי לשנות מקום · `:'')+(m.ai&&m.ai.desc?m.ai.desc+' · ':'')+(m.converted?'הומר ל-MP4 · ':'')+'לחצו לכרטיס ההבנה';
     b.setAttribute('aria-pressed',m.excluded?'true':'false');
     b.onclick=()=>openCard(m);
+    if(!S.demo){b.draggable=true;b.ondragstart=e=>{DRAG=m;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(m.id));b.classList.add('drg')};b.ondragend=()=>{b.classList.remove('drg');g.querySelectorAll('.dov').forEach(x=>x.classList.remove('dov'))};
+      b.ondragover=e=>{const id=+e.dataTransfer.types.includes('text/plain');if(!DRAG&&!id)return;e.preventDefault();b.classList.add('dov')};b.ondragleave=()=>b.classList.remove('dov');
+      b.ondrop=e=>{e.preventDefault();b.classList.remove('dov');const id=+e.dataTransfer.getData('text/plain'),src=S.media.find(x=>x.id===id);if(!src||src===m)return;moveBefore(src,m);orderChanged()}}
     if(used&&!used.has(m)&&!m.excluded&&!m.dup)b.style.opacity='.55';
     g.append(b);
-  });
+  });});
   const n=S.media.length,dups=S.media.filter(m=>m.dup).length;
-  $('#mcount').textContent=n?`${n} פריטים`+(dups?` · ${dups} כפולים סוננו`:'')+(used?` · ${used.size} בקליפ`:''):'';
+  $('#mcount').textContent=n?`${n} פריטים`+(!S.demo&&groups.length>1?` · ${groups.length} אירועים`:'')+(dups?` · ${dups} כפולים סוננו`:'')+(used?` · ${used.size} בקליפ`:''):'';
 }
 function updateSteps(){
   const has=S.media.length&&S.audio&&!S.demo,pl=S.plan&&!S.demo;
@@ -2548,6 +2647,9 @@ function applyExample(k){
 
 /* ================= loading flows ================= */
 async function addFiles(files){
+  files=[...files];
+  const side=files.filter(f=>/\.json$/i.test(f.name));
+  if(side.length){const n=await readSidecars(side);if(n){const k=applySidecars();if(k){placeUndated();orderChanged(`${k} תאריכים עודכנו מקובצי Google Takeout`)}else toast(`נקראו ${n} תאריכים מ-Google Takeout`)}}
   files=[...files].filter(f=>/^(image|video)\//.test(f.type)||/\.(heic|jpe?g|png|webp|mp4|mov|m4v|webm|hevc|3gp|mkv)$/i.test(f.name));
   if(!files.length)return;
   if(S.demo)clearDemo();stop();
@@ -2792,7 +2894,7 @@ const facesIn=fs=>fs?fs.map(f=>({...f,desc:f.desc?Float32Array.from(f.desc):null
 async function blobOf(m){if(m.kind==='image')return new Promise(r=>m.src.toBlob(r,'image/jpeg',.92));return m.file||null}
 async function ensureBlob(m){if(m.blobId)return true;const b=await blobOf(m);if(!b)return false;const id=newId('b');await idbPut('blobs',b,id);m.blobId=id;m.blobType=b.type||(m.kind==='image'?'image/jpeg':'video/mp4');return true}
 function mediaMeta(m){
-  return{und:m.und||null,date:m.date||null,dateSrc:m.dateSrc||null,id:m.id,name:m.name,kind:m.kind,blob:m.blobId,type:m.blobType,w:m.w,h:m.h,dur:m.dur,thumb:m.thumb,converted:!!m.converted,edge:m.edge||null,
+  return{und:m.und||null,date:m.date||null,dateSrc:m.dateSrc||null,fileDate:m.fileDate||null,dateRef:m.dateRef||null,id:m.id,name:m.name,kind:m.kind,blob:m.blobId,type:m.blobType,w:m.w,h:m.h,dur:m.dur,thumb:m.thumb,converted:!!m.converted,edge:m.edge||null,
     stats:stripStats(m.stats),qline:m.qline||null,motion:m.motion,bestT:m.bestT,ai:m.ai||null,aiTried:!!m.aiTried,faces:facesOut(m.faces),facesDone:!!m.facesDone,
     excluded:!!m.excluded,dup:!!m.dup,manualFocus:m.manualFocus||null,userTrack:m.userTrack||null,tracks:m.tracks||null,obj:m.obj||null,
     moments:m.moments?m.moments.map(mo=>({t:mo.t,q:mo.q,stats:stripStats(mo.stats),thumb:mo.thumb,motion:mo.motion,faces:facesOut(mo.faces),obj:mo.obj||null})):null};
@@ -2822,7 +2924,7 @@ async function persistProject(){const rec=await buildRecord();await idbPut('proj
 async function mediaFromMeta(meta,blob){
   const file=new File([blob],meta.name||'media',{type:meta.type||blob.type});
   const m=await loadMediaFile(file,1600);
-  Object.assign(m,{und:meta.und||undefined,date:meta.date||m.date,dateSrc:meta.dateSrc||m.dateSrc,qline:meta.qline||null,id:meta.id,name:meta.name,thumb:meta.thumb||m.thumb,converted:meta.converted,edge:meta.edge,stats:meta.stats,motion:meta.motion,bestT:meta.bestT,ai:meta.ai,aiTried:meta.aiTried,
+  Object.assign(m,{und:meta.und||undefined,date:meta.date||m.date,dateSrc:meta.dateSrc||m.dateSrc,fileDate:meta.fileDate||m.fileDate,dateRef:meta.dateRef||undefined,qline:meta.qline||null,id:meta.id,name:meta.name,thumb:meta.thumb||m.thumb,converted:meta.converted,edge:meta.edge,stats:meta.stats,motion:meta.motion,bestT:meta.bestT,ai:meta.ai,aiTried:meta.aiTried,
     faces:facesIn(meta.faces)||[],facesDone:meta.facesDone,excluded:meta.excluded,dup:meta.dup,manualFocus:meta.manualFocus||undefined,userTrack:meta.userTrack||undefined,tracks:meta.tracks||undefined,obj:meta.obj||undefined,
     file:m.kind==='video'?file:null,blobId:meta.blob,blobType:meta.type});
   if(!m.manualFocus)delete m.manualFocus;if(!m.userTrack)delete m.userTrack;
