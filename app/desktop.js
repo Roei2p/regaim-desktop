@@ -18,6 +18,13 @@
     }
   };
 
+  window.regaim.transcode = async (blob, to, fps) => {
+    const out = await N.transcode(await blob.arrayBuffer(), to, fps);
+    return new Blob([out], { type: to === 'gif' ? 'image/gif' : to === 'mov' ? 'video/quicktime' : 'video/mp4' });
+  };
+  // more export formats on the computer
+  const addFmts = () => { const seg = document.getElementById('fmtSeg'); if (!seg || seg.querySelector('[value=mov]')) return; for (const [v, t] of [['mov', 'MOV'], ['gif', 'GIF']]) { const l = document.createElement('label'); l.innerHTML = `<input type="radio" name="fmt" value="${v}"><span>${t}</span>`; seg.append(l); } };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addFmts); else addFmts();
   window.claude = {
     async use(name) {
       if (name === 'downloads') {

@@ -110,6 +110,21 @@ ipcMain.handle('convert', async (e, { input, name }) => {
   });
 });
 
+/* ---------- export to other formats with the full FFmpeg ---------- */
+ipcMain.handle('transcode', async (_e, { data, to, fps }) => {
+  const id = Date.now().toString(36), inp = path.join(TMP_DIR, id + '-in'), out = path.join(TMP_DIR, id + '.' + to);
+  await fs.promises.writeFile(inp, Buffer.from(data));
+  const args = to === 'gif'
+    ? ['-y', '-i', inp, '-vf', 'fps=15,scale=540:-2:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a', out]
+    : to === 'mov'
+      ? ['-y', '-i', inp, '-c:v', 'libx264', '-preset', 'slow', '-crf', '16', '-pix_fmt', 'yuv420p', '-r', String(fps || 30), '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', out]
+      : ['-y', '-i', inp, '-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(fps || 30), '-c:a', 'aac', '-b:a', '256k', '-movflags', '+faststart', out];
+  await new Promise((res, rej) => { const p = spawn(ffmpegPath(), args, { windowsHide: true }); let err = ''; p.stderr.on('data', (b) => { err = (err + b).slice(-2000); }); p.on('error', rej); p.on('close', (c) => c === 0 ? res() : rej(new Error('ffmpeg ' + c + ' ' + err.slice(-200)))); });
+  const buf = await fs.promises.readFile(out);
+  fs.promises.rm(inp, { force: true }).catch(() => {}); fs.promises.rm(out, { force: true }).catch(() => {});
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+});
+
 /* ---------- Claude, with the user's own API key ---------- */
 ipcMain.handle('key-status', () => ({ has: !!getKey() }));
 ipcMain.handle('key-set', (_e, key) => {

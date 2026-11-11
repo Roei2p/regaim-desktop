@@ -437,7 +437,7 @@ body{margin:0}
 .hd{top:94px;height:70px}
 @media (max-width:999px){
   .app{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"top" "stage" "insp" "bot";height:auto;min-height:100dvh}
-  .timeline .tlin{height:172px}.timeline .tl{flex:none}
+  .timeline .tlin{height:236px}.timeline .tl{flex:none}.tlw{flex:none}
   .mbar{flex-wrap:wrap;gap:6px 10px}.mbar .pjbar{order:3;flex-basis:100%;max-width:none;margin:0}
   .bottom{grid-template-columns:minmax(0,1fr)}
   .bin{max-height:none}.bin .mbox{max-height:280px}
@@ -445,6 +445,21 @@ body{margin:0}
   .mdd{right:auto;left:0}
   .menus .mn:nth-child(n+4) .mdd{left:auto;right:0}
 }
+.tlw{flex:1;min-height:0;display:flex}.tlab{flex:none;width:22px;position:relative;border-inline-end:1px solid var(--line);margin-inline-end:4px}
+.tlab span{position:absolute;inset-inline:0;text-align:center;font:600 10px var(--mono);color:var(--mute)}
+.timeline .sh,.timeline .hd{height:var(--vh,70px)}
+.trow{position:absolute;left:0;right:0;border-radius:5px;background:rgba(255,255,255,.035);cursor:copy}
+.tx,.fx{position:absolute;border-radius:5px;font-size:11px;line-height:1;white-space:nowrap;overflow:hidden;cursor:grab;touch-action:none;display:flex;align-items:center;z-index:3;user-select:none}
+.tx{height:24px;background:#3b2f63;border:1px solid #7c6ad6;color:#fff;padding:0 8px}.tx span{overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.tx .hl,.tx .hr{position:absolute;top:0;bottom:0;width:7px;cursor:ew-resize}.tx .hl{left:0}.tx .hr{right:0}.tx .hl::after,.tx .hr::after{content:'';position:absolute;top:6px;bottom:6px;left:3px;width:1px;background:rgba(255,255,255,.6)}
+.fx{height:20px;background:#173f3a;border:1px solid #3cb6a2;color:#d6fff7;padding:0 6px;font-size:10.5px}
+.tx.sel,.fx.sel{outline:2px solid var(--amber);outline-offset:1px}
+.mk{position:absolute;top:0;bottom:0;background:rgba(239,93,127,.16);border-inline:2px solid var(--rose);pointer-events:none;z-index:2}.mk.half{border-style:dashed}
+.tladd{display:flex;gap:4px;align-items:center}.tladd .btn{padding:3px 9px;font-size:12.5px}
+.sfxm{position:relative}.sfxm .mdd{min-width:150px;top:calc(100% + 4px);bottom:auto}
+.stg{display:flex;flex-wrap:wrap;gap:5px}.stg .btn{padding:4px 9px;font-size:12px}.stg .btn.on{background:var(--amber);color:var(--amber-ink);border-color:var(--amber)}
+.oi{display:flex;flex-direction:column;gap:10px}.oi textarea{width:100%;box-sizing:border-box;background:var(--raise);border:1px solid var(--line);border-radius:9px;color:inherit;font:inherit;padding:8px;resize:vertical}
+.oi select{background:var(--raise);border:1px solid var(--line);border-radius:8px;color:inherit;padding:5px}
 </style>
 
 <div class="app" dir="rtl">
@@ -463,10 +478,13 @@ body{margin:0}
         <button role="menuitem" data-act="song"><span>בחירת שיר…</span></button>
         <hr>
         <button role="menuitem" data-act="export" data-need="plan"><span>ייצוא וידאו…</span><kbd>Ctrl+E</kbd></button>
+        <div class="mrow"><span>קצב פריימים</span><div class="seg" role="radiogroup" aria-label="קצב פריימים"><label><input type="radio" name="fps" value="30" checked><span>30</span></label><label><input type="radio" name="fps" value="60"><span>60</span></label></div></div>
+        <div class="mrow"><span>פורמט קובץ</span><div class="seg" role="radiogroup" aria-label="פורמט קובץ" id="fmtSeg"><label><input type="radio" name="fmt" value="mp4" checked><span>MP4</span></label><label><input type="radio" name="fmt" value="webm"><span>WebM</span></label></div></div>
         <div class="mrow"><span>איכות ייצוא</span><div class="seg" role="radiogroup" aria-label="איכות ייצוא"><label><input type="radio" name="res" value="720" checked><span>720p</span></label><label><input type="radio" name="res" value="1080"><span>1080p</span></label></div></div>
       </div></div>
       <div class="mn"><button class="mt" role="menuitem" aria-haspopup="true" aria-expanded="false">עריכה</button><div class="mdd" role="menu" id="m-edit">
         <button role="menuitem" data-act="undo"><span>ביטול</span><kbd>Ctrl+Z</kbd></button>
+        <button role="menuitem" data-act="redo"><span>ביצוע שוב</span><kbd>Ctrl+Y</kbd></button>
         <hr>
         <button role="menuitem" data-act="make"><span>יצירת הקליפ מחדש</span></button>
         <button role="menuitem" data-act="vary" data-need="plan"><span>וריאציה: אותו חומר, חיתוך אחר</span></button>
@@ -477,6 +495,16 @@ body{margin:0}
         <button role="menuitem" data-act="next" data-need="sel"><span>הזזת הסצנה מאוחר יותר</span></button>
         <button role="menuitem" data-act="swap" data-need="sel"><span>החלפת החומר בסצנה</span></button>
         <button role="menuitem" data-act="out" data-need="sel"><span>הוצאת הפריט מהקליפ</span></button>
+        <hr>
+        <button role="menuitem" data-act="mIn" data-need="plan"><span>סימון התחלה</span><kbd>I</kbd></button>
+        <button role="menuitem" data-act="mOut" data-need="plan"><span>סימון סוף</span><kbd>O</kbd></button>
+        <button role="menuitem" data-act="ripple" data-need="plan"><span>חיתוך הקטע המסומן וסגירת הרווח</span><kbd>Shift+Del</kbd></button>
+        <button role="menuitem" data-act="rippleSc" data-need="sel"><span>מחיקת הסצנה וסגירת הרווח</span></button>
+        <button role="menuitem" data-act="mClr" data-need="plan"><span>ניקוי הסימון</span></button>
+        <hr>
+        <button role="menuitem" data-act="addTx" data-need="plan"><span>הוספת טקסט בסמן</span><kbd>T</kbd></button>
+        <button role="menuitem" data-act="addCap" data-need="plan"><span>הוספת כתוביות מילה-מילה</span></button>
+        <button role="menuitem" data-act="addFx" data-need="plan"><span>הוספת סאונד אפקט בסמן</span></button>
       </div></div>
       <div class="mn"><button class="mt" role="menuitem" aria-haspopup="true" aria-expanded="false">תצוגה</button><div class="mdd" role="menu" id="m-view">
         <button role="menuitem" data-act="zin" data-need="plan"><span>הגדלת ציר הזמן</span><kbd>+</kbd></button>
@@ -656,10 +684,11 @@ body{margin:0}
       <h3 id="h-tl">ציר זמן</h3><div class="chips" id="chips"></div>
       <div class="tlctl">
         <label class="tlv" title="הקול המקורי של כל הסרטונים בקליפ"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>קול הסרטונים</span><input type="range" id="tlVol" min="0" max="100" value="35" aria-label="עוצמת הקול המקורי בכל הקליפ"><output id="tlVolO">35%</output></label>
+        <div class="tladd"><button class="btn" id="addTx" title="טקסט חדש בסמן (T)">+ טקסט</button><button class="btn" id="addCap" title="כתוביות מילה-מילה בסמן">+ כתוביות</button><div class="mn sfxm"><button class="btn mt2" id="addFx" aria-haspopup="true" title="סאונד אפקט בסמן">+ סאונד</button><div class="mdd" id="fxMenu" role="menu"></div></div></div>
         <div class="tlz" role="group" aria-label="זום ציר הזמן"><button class="btn" id="tlZout" title="הקטנה (Ctrl + גלגלת, או מקש -)" aria-label="הקטנת ציר הזמן">−</button><button class="btn" id="tlZfit" title="כל הקליפ בתצוגה (מקש 0)">הכול</button><button class="btn" id="tlZin" title="הגדלה (Ctrl + גלגלת, או מקש +)" aria-label="הגדלת ציר הזמן">+</button><output id="tlZo">×1</output></div>
       </div>
     </div>
-    <div class="tl" id="tl" dir="ltr"><div class="tlin" id="tlin"><canvas id="wave"></canvas><div id="strip"></div><div class="ph" id="ph"></div></div></div>
+    <div class="tlw" dir="ltr"><div class="tlab" id="tlab" aria-hidden="true"></div><div class="tl" id="tl" dir="ltr"><div class="tlin" id="tlin"><canvas id="wave"></canvas><div id="strip"></div><div class="ph" id="ph"></div></div></div></div>
   </section>
   </div>
 </div>
@@ -761,7 +790,7 @@ for(const k in STYLES){const o=STYLES[k].ov;for(const n of ['leak','bloom','grai
 
 const S={media:[],audio:null,A:null,plan:null,style:'cinematic',aspect:'9:16',len:'45',
   title:'',subtitle:'',autoTitle:'',autoSub:'',introTpl:'auto',outroTpl:'auto',outroText:'',outroSub:'',credits:'',introMedia:null,outroMedia:null,
-  react:1,bassFx:true,drumFx:true,viz:false,particles:true,captions:true,grain:true,ai:true,faces:true,seed:1,demo:false,res:720,sel:-1,frameMode:'bal',flow:'smooth',origSound:true,origLevel:.35,
+  react:1,bassFx:true,drumFx:true,viz:false,particles:true,captions:true,grain:true,ai:true,faces:true,seed:1,demo:false,res:720,fps:30,fmt:'mp4',sel:-1,frameMode:'bal',flow:'smooth',origSound:true,origLevel:.35,
   target:null,targetOnly:true};
 let uid=0,shotUid=0,PREVIEW_STILL=false,SEEKBUSY=0;
 /* "smooth" flow: every style keeps its look (colour, type, grain) but scenes melt into each other, no flashes or strobes */
@@ -2018,11 +2047,11 @@ function applyLook(P){
 /* ================= edits: undo, trim, split, move, delete, replace ================= */
 let UNDO=[];
 function cloneShot(s){return{...s,mo:s.mo?{...s.mo,a:s.mo.a&&{...s.mo.a},b:s.mo.b&&{...s.mo.b}}:null,tr:s.tr?{...s.tr}:null}}
-function clonePlan(P){return{...P,shots:P.shots.map(cloneShot),intro:{...P.intro},outro:{...P.outro}}}
-function snapshot(){if(!S.plan)return;UNDO.push({plan:clonePlan(S.plan),style:S.style,seed:S.seed,it:S.introTpl,ot:S.outroTpl});if(UNDO.length>40)UNDO.shift();updUndo()}
+function clonePlan(P){return{...P,shots:P.shots.map(cloneShot),intro:{...P.intro},outro:{...P.outro},texts:(P.texts||[]).map(x=>({...x,words:x.words?x.words.map(w=>({...w})):undefined})),sfx:(P.sfx||[]).map(x=>({...x}))}}
+function snapshot(){if(!S.plan)return;REDO=[];UNDO.push({plan:clonePlan(S.plan),style:S.style,seed:S.seed,it:S.introTpl,ot:S.outroTpl});if(UNDO.length>40)UNDO.shift();updUndo()}
 function updUndo(){$('#undo').disabled=!UNDO.length}
 function undo(){
-  const u=UNDO.pop();if(!u)return;stop();S.plan=u.plan;S.style=u.style;S.seed=u.seed;S.introTpl=u.it;S.outroTpl=u.ot;
+  const u=UNDO.pop();if(!u)return;REDO.push(stateNow());stop();S.plan=u.plan;S.style=u.style;S.seed=u.seed;S.introTpl=u.it;S.outroTpl=u.ot;
   syncChoiceUI();applyLook(S.plan);vig=null;ensureCanvas();refreshUI(Pl.offset);toast('בוטל');
 }
 function gapOf(rs,dur){const r=[...rs].sort((p,q)=>p[0]-q[0]);let best={a:0,b:0},cur=0;for(const x of r){if(x[0]-cur>best.b-best.a)best={a:cur,b:x[0]};cur=Math.max(cur,x[1])}if(dur-cur>best.b-best.a)best={a:cur,b:dur};return best}
@@ -2229,7 +2258,7 @@ function winA(t,a,b,fi,fo){if(t<a||t>b)return 0;return Math.min(1,(t-a)/fi,(b-t)
 function renderAt(t){
   const P=S.plan;if(!P)return;const W=cv.width,H=cv.height,sh=P.shots;
   t=clamp(t,0,P.D-.001);const rx=reactAt(t),i=shotIndex(t),it=P.intro;
-  if(P.outro.tpl==='collage'&&t>=P.outroStart){drawCollage(t,W,H,rx);overlays(t,W,H,i,rx,true);return}
+  if(P.outro.tpl==='collage'&&t>=P.outroStart){drawCollage(t,W,H,rx);overlays(t,W,H,i,rx,true);drawTexts(t,W,H);return}
   const special=t<P.introEnd&&(it.tpl==='black'||it.tpl==='reveal'||(it.tpl==='countdown'&&t<it.cdEnd));
   if(special){if(it.tpl!=='countdown')drawShot(la,sh[0],t,W,H,rx,false);introComposite(t,W,H)}
   else{
@@ -2239,6 +2268,7 @@ function renderAt(t){
     else drawShot(cx,sh[i],t,W,H,rx,true);
   }
   overlays(t,W,H,i,rx,false);
+  drawTexts(t,W,H);
 }
 
 /* ---------- intro ---------- */
@@ -2440,7 +2470,7 @@ function drawEmptyScreen(){const W=cv.width,H=cv.height;cx.fillStyle='#0c0a10';c
 
 /* ================= playback ================= */
 function now(){return Pl.ctx.currentTime-Pl.t0}
-function stopSrc(){if(Pl.src){try{Pl.src.onended=null;Pl.src.stop()}catch(e){}Pl.src.disconnect();Pl.src=null}}
+function stopSrc(){stopSfx();if(Pl.src){try{Pl.src.onended=null;Pl.src.stop()}catch(e){}Pl.src.disconnect();Pl.src=null}}
 function setPlayIcon(p){$('#icPlay').hidden=p;$('#icPause').hidden=!p;$('#play').setAttribute('aria-label',p?'השהה':'נגן')}
 async function play(from){
   const P=S.plan;if(!P||!S.audio)return;ensureCtx();await Pl.ctx.resume();stopSrc();
@@ -2449,7 +2479,7 @@ async function play(from){
   const n=Pl.ctx.currentTime+.06,s=P.seg.s,D=P.D;
   if(from<.05&&s>.5){g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(1,n+.35)}else{g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(1,n+.04)}
   const fs=D-1.6;if(from<fs){g.gain.setValueAtTime(1,n+fs-from);g.gain.linearRampToValueAtTime(0,n+D-from)}else g.gain.linearRampToValueAtTime(0,n+D-from);
-  src.start(n,s+from,D-from+.05);Pl.src=src;Pl.t0=n-from;Pl.playing=true;setPlayIcon(true);
+  src.start(n,s+from,D-from+.05);Pl.src=src;Pl.t0=n-from;Pl.playing=true;setPlayIcon(true);scheduleSfx(from,n);
   cancelAnimationFrame(Pl.raf);Pl.raf=requestAnimationFrame(loop);
 }
 function loop(){
@@ -2520,7 +2550,7 @@ function drawTimeline(){
     if(i>0&&s.tr.type!=='cut'){const g=document.createElement('span');g.className='tr'+(s.trLock?' lk':s.tr.type==='flash'||s.isDrop?' f':'');g.textContent=TR_GL[s.tr.type]||'·';b.append(g)}
     if(s.role==='intro'||s.role==='outro'){const g=document.createElement('span');g.className='rl';g.textContent=s.role==='intro'?'פתיח':'סיום';b.append(g)}
     if(S.target&&hasTarget(s.m)){const g=document.createElement('span');g.className='tm';g.textContent='◎';g.title='המושא בסצנה';b.append(g)}
-    b.onclick=()=>{S.sel=i;if(!Pl.playing)seekTo(s.t0+Math.min(.6,(s.t1-s.t0)/2));showInsp();STRIP.forEach((o,k)=>o.b.classList.toggle('sel',k===i))};
+    b.onclick=()=>{S.sel=i;S.selObj=null;drawTracks();if(!Pl.playing)seekTo(s.t0+Math.min(.6,(s.t1-s.t0)/2));showInsp();STRIP.forEach((o,k)=>o.b.classList.toggle('sel',k===i))};
     st.append(b);STRIP.push({b});
   });
   P.shots.slice(0,-1).forEach((s,i)=>{
@@ -2534,6 +2564,7 @@ function drawTimeline(){
     };
   });
   layoutStrip();
+  drawTracks();
 }
 function layoutStrip(){const P=S.plan;P.shots.forEach((s,i)=>{const o=STRIP[i];if(!o)return;o.b.style.left=(s.t0*PPS+1)+'px';o.b.style.width=Math.max(4,(s.t1-s.t0)*PPS-2)+'px';if(o.h)o.h.style.left=(s.t1*PPS)+'px'})}
 /* zoom keeps the point you are looking at (the mouse, or the playhead) in the same place */
@@ -2563,6 +2594,8 @@ function reasonOf(s){
 }
 const CAM_HE={push:'מתקרבת',pull:'מתרחקת',pan:'פאן',drift:'כמעט נייחת',fit:'תמונה מלאה על רקע מטושטש',video:'וידאו',track:'עוקבת'};
 function showInsp(){
+  if(S.selObj&&S.plan&&showObjInsp())return;
+  $('#h-insp').textContent='הסצנה מול הנגן';
   try{STRIP.forEach((o,k)=>o.b.classList.toggle('sel',k===S.sel))}catch(e){}
   const P=S.plan,i=S.sel,box=$('#insp');$('#inspN').textContent=P&&i>=0&&P.shots[i]?`${i+1} מתוך ${P.shots.length}`:'';
   if(!P||i<0||!P.shots[i]){box.innerHTML=`<p class="hint">${P?'עצרו את הנגן או לחצו על סצנה בציר הזמן כדי לערוך אותה.':'אחרי יצירת הקליפ יופיעו כאן כלי העריכה של הסצנה שמול הנגן.'}</p>`;return}
@@ -2714,7 +2747,8 @@ function refreshUI(t){if(!S.plan)return;if(S.sel>=S.plan.shots.length)S.sel=-1;d
 function rebuild(keepT,noSnap){
   stop();const t=keepT?Pl.offset:null;
   if(S.plan&&!noSnap)snapshot();
-  const P=buildPlan();if(!P){updateSteps();return}
+  const old=S.plan,P=buildPlan();if(!P){updateSteps();return}
+  if(old){P.texts=(old.texts||[]).filter(x=>x.t0<P.D-.3).map(x=>({...x,t1:Math.min(x.t1,P.D)}));P.sfx=(old.sfx||[]).filter(x=>x.t<P.D)}
   S.plan=P;vig=null;ensureCanvas();refreshUI(t);scheduleExamples();
   if(P.shortTo)log(`יש חומר לכ-${fmt(P.D)} בלי למתוח תמונות ובלי לחזור על סצנות, אז הקליפ קוצר. להוספת אורך הוסיפו עוד תמונות או סרטונים`,'warn');
   if(P.note==='few')log('המושא מופיע במעט פריטים, אז נוספו עוד חומרים כדי שהסצנות לא יימרחו. הסצנות עם המושא מקבלות עדיפות','warn');
@@ -2878,10 +2912,10 @@ async function exportClip(){
   if(!window.MediaRecorder||!cv.captureStream){toast('הדפדפן הזה לא תומך בייצוא. נסו Chrome במחשב');return}
   stop();ensureCtx();await Pl.ctx.resume();
   const [W,H]=exportDims();sizeCanvas(W,H);
-  const vs=cv.captureStream(30),tracks=[...vs.getVideoTracks(),...(Pl.dest?Pl.dest.stream.getAudioTracks():[])];
-  const types=['video/mp4;codecs=avc1.42E01F,mp4a.40.2','video/mp4;codecs=avc1,mp4a','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  const FPS=S.fps||30,vs=cv.captureStream(FPS),tracks=[...vs.getVideoTracks(),...(Pl.dest?Pl.dest.stream.getAudioTracks():[])];
+  const mp4T=['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1.42E01F,mp4a.40.2','video/mp4;codecs=avc1,mp4a','video/mp4'],webT=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'],types=S.fmt==='webm'?[...webT,...mp4T]:[...mp4T,...webT];
   const mime=types.find(t=>MediaRecorder.isTypeSupported(t))||'';
-  let rec;try{rec=new MediaRecorder(new MediaStream(tracks),mime?{mimeType:mime,videoBitsPerSecond:S.res>=1080?12e6:6e6,audioBitsPerSecond:192000}:{})}catch(e){toast('לא הצלחתי להתחיל ייצוא בדפדפן הזה');ensureCanvas();seekTo(Pl.offset);return}
+  let rec;try{rec=new MediaRecorder(new MediaStream(tracks),mime?{mimeType:mime,videoBitsPerSecond:(S.res>=1080?14e6:7e6)*(FPS>=60?1.5:1),audioBitsPerSecond:256000}:{})}catch(e){toast('לא הצלחתי להתחיל ייצוא בדפדפן הזה');ensureCanvas();seekTo(Pl.offset);return}
   const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
   const stopped=new Promise(r=>rec.onstop=r);let cancelled=false;
   openSheet('מייצא',`${W}×${H} · ${fmt(S.plan.D)}. השאירו את הלשונית פתוחה עד הסוף.`,true);
@@ -2891,8 +2925,9 @@ async function exportClip(){
   await new Promise(r=>setTimeout(r,250));rec.stop();await stopped;Pl.rec=null;
   ensureCanvas();seekTo(.01);
   if(cancelled||!chunks.length){closeSheet();if(!cancelled)toast('הייצוא לא הפיק וידאו');return}
-  const ext=(rec.mimeType||mime).includes('mp4')?'mp4':'webm';
-  const blob=new Blob(chunks,{type:(rec.mimeType||mime||'video/webm').split(';')[0]});
+  let ext=(rec.mimeType||mime).includes('mp4')?'mp4':'webm';
+  let blob=new Blob(chunks,{type:(rec.mimeType||mime||'video/webm').split(';')[0]});
+  if(window.regaim&&window.regaim.transcode&&((S.fmt&&S.fmt!==ext)||ext==='webm'&&S.fmt!=='webm')){const to=S.fmt||'mp4';$('#shT').textContent='ממיר ל-'+to.toUpperCase();try{blob=await window.regaim.transcode(blob,to,FPS);ext=to}catch(e){console.warn('transcode',e)}}
   lastOut={blob,name:((S.plan.title||'clip').replace(/[\\/:*?"<>|]/g,'').trim()||'clip')+'.'+ext};
   const v=$('#shVid');if(v.src)URL.revokeObjectURL(v.src);v.src=URL.createObjectURL(blob);v.hidden=false;
   $('#shT').textContent='הקליפ מוכן';$('#shBar').parentElement.hidden=true;
@@ -3017,7 +3052,7 @@ function mediaMeta(m){
     excluded:!!m.excluded,dup:!!m.dup,manualFocus:m.manualFocus||null,userTrack:m.userTrack||null,tracks:m.tracks||null,obj:m.obj||null,
     moments:m.moments?m.moments.map(mo=>({t:mo.t,q:mo.q,stats:stripStats(mo.stats),thumb:mo.thumb,motion:mo.motion,faces:facesOut(mo.faces),obj:mo.obj||null})):null};
 }
-const SETTINGS=['style','aspect','len','introTpl','outroTpl','title','subtitle','autoTitle','autoSub','outroText','outroSub','credits','react','bassFx','drumFx','viz','particles','captions','grain','ai','faces','seed','res','targetOnly','frameMode','flow','origSound','origLevel'];
+const SETTINGS=['style','aspect','len','introTpl','outroTpl','title','subtitle','autoTitle','autoSub','outroText','outroSub','credits','react','bassFx','drumFx','viz','particles','captions','grain','ai','faces','seed','res','targetOnly','frameMode','flow','origSound','origLevel','fps','fmt'];
 function planOut(P){
   if(!P)return null;const{shots,intro,outro,...rest}=P;
   const ref=m=>m.isMoment?{id:(m.base||m).id,t:m.bestT}:{id:m.id};
@@ -3058,7 +3093,7 @@ function resetProjectState(){
 }
 function applySettingsUI(){
   syncChoiceUI();
-  const chk=(n,v)=>{const r=document.querySelector(`input[name=${n}][value="${v}"]`);if(r)r.checked=true};chk('aspect',S.aspect);chk('len',S.len);chk('res',S.res);chk('frame',S.frameMode||'bal');chk('flow',S.flow||'smooth');
+  const chk=(n,v)=>{const r=document.querySelector(`input[name=${n}][value="${v}"]`);if(r)r.checked=true};chk('aspect',S.aspect);chk('len',S.len);chk('res',S.res);chk('fps',S.fps||30);chk('fmt',S.fmt||'mp4');chk('frame',S.frameMode||'bal');chk('flow',S.flow||'smooth');
   $('#title').value=S.title||'';$('#subtitle').value=S.subtitle||'';$('#outroText').value=S.outroText||'';$('#outroSub').value=S.outroSub||'';$('#credits').value=S.credits||'';
   const v=Math.round(S.react*65);$('#react').value=v;$('#reactOut').textContent=v<25?'עדינה':v<75?'רגילה':'חזקה';
   for(const [id,k] of [['optBass','bassFx'],['optDrum','drumFx'],['optViz','viz'],['optPart','particles'],['optCap','captions'],['optGrain','grain'],['optAi','ai'],['optFaces','faces'],['optOnly','targetOnly'],['optSnd','origSound']]){const el=$('#'+id);if(el)el.checked=!!S[k]}
@@ -3086,7 +3121,7 @@ async function openProject(id){
       const byId=new Map(allMedia().map(m=>[m.id,m]));let bad=false;
       const res=r=>{const b=byId.get(r.id);if(!b){bad=true;return null}if(r.t==null)return b;const mo=(b.moments||[]).find(x=>Math.abs(x.t-r.t)<.02);if(!mo)return b;return momentItem(b,mo)};
       P={...rec.plan,intro:{},outro:{},shots:rec.plan.shots.map(x=>({...x,m:res(x.ref),tr:x.tr?{type:x.tr.type,d:0}:null}))};
-      shotUid=Math.max(shotUid,...P.shots.map(s=>s.id||0));
+      shotUid=Math.max(shotUid,...P.shots.map(s=>s.id||0));objUid=Math.max(objUid,...(P.texts||[]).map(x=>x.id||0),...(P.sfx||[]).map(x=>x.id||0));
       if(bad||!P.shots.length)P=null;else{fixVideoRanges(P);applyLook(P)}
     }
     if(P){S.plan=P;S.sel=-1;ensureCanvas();refreshUI(.5);scheduleExamples()}
@@ -3198,6 +3233,189 @@ window.addEventListener('pagehide',()=>{if(PJ.dirty)saveNow()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&PJ.dirty)saveNow()});
 
 
+/* ================= layers: text track and sound-effects track ================= */
+let objUid=0;
+const TXT_STYLES={
+  karaoke:{he:'כתוביות מילה-מילה',font:'600 {px}px "IBM Plex Sans Hebrew", Rubik, sans-serif',size:.058,pill:true,words:true},
+  pill:{he:'כתובית בכדור',font:'600 {px}px "IBM Plex Sans Hebrew", Rubik, sans-serif',size:.055,pill:true},
+  title:{he:'כותרת קלאסית',font:'700 {px}px "Frank Ruhl Libre", Georgia, serif',size:.1,shadow:true},
+  bold:{he:'כותרת בולטת',font:'700 {px}px Karantina, Rubik, sans-serif',size:.15,stroke:true},
+  neon:{he:'ניאון',font:'900 {px}px Rubik, sans-serif',size:.085,neon:true},
+  lower:{he:'שורה תחתונה',font:'400 {px}px "Secular One", Rubik, sans-serif',size:.05,bar:true},
+  type:{he:'מכונת כתיבה',font:'400 {px}px "Suez One", "Frank Ruhl Libre", serif',size:.065,typer:true,shadow:true}
+};
+const TXT_ANIM_HE={auto:'לפי הסגנון',fade:'דהייה',pop:'קפיצה',slide:'החלקה',type:'הקלדה',none:'בלי'};
+const SFX={whoosh:'וווש',riser:'רייזר עולה',pop:'פופ',ding:'דינג',click:'קליק',boom:'בום',shutter:'מצלמה',glitch:'גליץ׳',sparkle:'נצנוץ'};
+const SFX_BUF={};
+async function sfxBuffer(kind){
+  if(SFX_BUF[kind])return SFX_BUF[kind];
+  const sr=44100,len={whoosh:.8,riser:1.8,pop:.25,ding:1.6,click:.08,boom:1.6,shutter:.3,glitch:.45,sparkle:1.2}[kind]||.6;
+  const oc=new OfflineAudioContext(2,Math.ceil(sr*len),sr),T=0;
+  const noise=()=>{const b=oc.createBuffer(1,Math.ceil(sr*len),sr),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const s=oc.createBufferSource();s.buffer=b;return s};
+  const out=oc.createGain();out.connect(oc.destination);
+  if(kind==='whoosh'||kind==='riser'){const n=noise(),f=oc.createBiquadFilter(),g=oc.createGain();f.type='bandpass';f.Q.value=kind==='riser'?2:1.2;
+    if(kind==='whoosh'){f.frequency.setValueAtTime(350,T);f.frequency.exponentialRampToValueAtTime(3200,T+.38);f.frequency.exponentialRampToValueAtTime(500,T+len);g.gain.setValueAtTime(0,T);g.gain.linearRampToValueAtTime(.9,T+.32);g.gain.exponentialRampToValueAtTime(.001,T+len)}
+    else{f.frequency.setValueAtTime(200,T);f.frequency.exponentialRampToValueAtTime(7000,T+len*.95);g.gain.setValueAtTime(.02,T);g.gain.exponentialRampToValueAtTime(.8,T+len*.95);g.gain.linearRampToValueAtTime(0,T+len)}
+    n.connect(f);f.connect(g);g.connect(out);n.start()}
+  else if(kind==='pop'){const o=oc.createOscillator(),g=oc.createGain();o.frequency.setValueAtTime(700,T);o.frequency.exponentialRampToValueAtTime(160,T+.12);g.gain.setValueAtTime(.9,T);g.gain.exponentialRampToValueAtTime(.001,T+.2);o.connect(g);g.connect(out);o.start();o.stop(T+len)}
+  else if(kind==='ding'||kind==='sparkle'){const fs=kind==='ding'?[[1318,1],[2637,.35],[3951,.18]]:[[2093,.5],[2637,.4],[3136,.35],[4186,.3]];fs.forEach(([fq,a],k)=>{const o=oc.createOscillator(),g=oc.createGain();o.type='sine';o.frequency.value=fq;const st=kind==='sparkle'?k*.09:0;g.gain.setValueAtTime(0,T+st);g.gain.linearRampToValueAtTime(a*.6,T+st+.005);g.gain.exponentialRampToValueAtTime(.001,T+st+(kind==='ding'?1.5:.7));o.connect(g);g.connect(out);o.start(T+st);o.stop(T+len)})}
+  else if(kind==='click'){const n=noise(),f=oc.createBiquadFilter(),g=oc.createGain();f.type='highpass';f.frequency.value=2500;g.gain.setValueAtTime(.9,T);g.gain.exponentialRampToValueAtTime(.001,T+.03);n.connect(f);f.connect(g);g.connect(out);n.start()}
+  else if(kind==='boom'){const o=oc.createOscillator(),g=oc.createGain();o.frequency.setValueAtTime(90,T);o.frequency.exponentialRampToValueAtTime(32,T+1.2);g.gain.setValueAtTime(1,T);g.gain.exponentialRampToValueAtTime(.001,T+1.5);o.connect(g);g.connect(out);o.start();o.stop(T+len);
+    const n=noise(),f=oc.createBiquadFilter(),g2=oc.createGain();f.type='lowpass';f.frequency.value=400;g2.gain.setValueAtTime(.5,T);g2.gain.exponentialRampToValueAtTime(.001,T+.4);n.connect(f);f.connect(g2);g2.connect(out);n.start()}
+  else if(kind==='shutter'){[0,.09].forEach(st=>{const n=noise(),f=oc.createBiquadFilter(),g=oc.createGain();f.type='bandpass';f.frequency.value=3200;f.Q.value=.8;g.gain.setValueAtTime(0,T+st);g.gain.linearRampToValueAtTime(.9,T+st+.004);g.gain.exponentialRampToValueAtTime(.001,T+st+.05);n.connect(f);f.connect(g);g.connect(out);n.start()})}
+  else if(kind==='glitch'){for(let k=0;k<7;k++){const o=oc.createOscillator(),g=oc.createGain();o.type='square';o.frequency.value=120+Math.random()*1600;const st=k*.06;g.gain.setValueAtTime(.25,T+st);g.gain.setValueAtTime(0,T+st+.045);o.connect(g);g.connect(out);o.start(T+st);o.stop(T+st+.05)}}
+  return SFX_BUF[kind]=await oc.startRendering();
+}
+function sfxLen(kind){return{whoosh:.8,riser:1.8,pop:.25,ding:1.6,click:.08,boom:1.6,shutter:.3,glitch:.45,sparkle:1.2}[kind]||.6}
+async function scheduleSfx(from,at){
+  const P=S.plan;if(!P||!P.sfx||!P.sfx.length)return;Pl.sfxSrc=Pl.sfxSrc||[];
+  for(const x of P.sfx){if(x.t+sfxLen(x.kind)<from||x.t>=P.D)continue;const buf=await sfxBuffer(x.kind);if(!Pl.playing)return;
+    const s=Pl.ctx.createBufferSource(),g=Pl.ctx.createGain();s.buffer=buf;g.gain.value=x.vol??.8;s.connect(g);g.connect(Pl.master);
+    const when=at+(x.t-from);if(when>=Pl.ctx.currentTime)s.start(when);else s.start(Pl.ctx.currentTime,Pl.ctx.currentTime-when);Pl.sfxSrc.push(s)}
+}
+function stopSfx(){for(const s of Pl.sfxSrc||[])try{s.stop()}catch(e){}Pl.sfxSrc=[]}
+/* text rendering */
+function wrapLines(c,text,maxW){const out=[];for(const para of String(text).split('\n')){let line='';for(const w of para.split(/\s+/).filter(Boolean)){const t=line?line+' '+w:w;if(c.measureText(t).width>maxW&&line){out.push(line);line=w}else line=t}out.push(line)}return out}
+function drawTexts(t,W,H){
+  const P=S.plan;if(!P||!P.texts||!P.texts.length)return;const m=Math.min(W,H);
+  for(const x of P.texts){
+    if(t<x.t0||t>x.t1)continue;const st=TXT_STYLES[x.style]||TXT_STYLES.pill,tau=t-x.t0,rem=x.t1-t,len=x.t1-x.t0;
+    const anim=x.anim&&x.anim!=='auto'?x.anim:st.typer?'type':st.words?'fade':x.style==='bold'?'pop':x.style==='lower'?'slide':'fade';
+    const ain=anim==='none'?1:clamp(tau/.35,0,1),aout=anim==='none'?1:clamp(rem/.3,0,1),a=Math.min(easeSine(ain),aout);
+    const px=Math.round(m*st.size*(x.size||1)),y=H*(x.y??.78);
+    cx.save();cx.font=st.font.replace('{px}',px);if('direction' in cx)cx.direction='rtl';cx.textAlign='center';cx.textBaseline='middle';
+    let text=x.text||'',kBase=0;
+    if(x.style==='karaoke'){const ws=String(text).split(/\s+/).filter(Boolean),tm=karTiming(x,ws.length,len),cur=Math.max(0,tm.findIndex(([a,b])=>tau<b+.05)),ch=karChunks(ws);const c=ch.find(c=>cur>=c[0]&&cur<c[1])||ch[ch.length-1]||[0,0];kBase=c[0];text=ws.slice(c[0],c[1]).join(' ')}
+    if(anim==='type'){const ch=Array.from(text),n=Math.floor(clamp(tau/Math.max(.4,Math.min(len*.6,ch.length*.06)),0,1)*ch.length);text=ch.slice(0,n).join('')}
+    const lines=wrapLines(cx,text,W*.84),lh=px*1.25,h=lines.length*lh;let sc=1,dy=0;
+    if(anim==='pop')sc=Math.max(.01,easeOutBack(clamp(tau/.4,0,1)));if(anim==='slide')dy=(1-easeOutCubic(clamp(tau/.45,0,1)))*px*1.2;
+    cx.globalAlpha=a;cx.translate(W/2,y+dy);cx.scale(sc,sc);
+    if(st.pill){const wmax=Math.max(...lines.map(l=>cx.measureText(l).width),px*2),pw=wmax+px*1.2,ph=h+px*.55;cx.save();cx.fillStyle='rgba(30,32,40,.55)';if(FILTER_OK)cx.filter='blur(0px)';rr(cx,-pw/2,-ph/2,pw,ph,ph*.5>px*1.1?px*.7:ph/2);cx.fill();cx.restore()}
+    if(st.bar){const wmax=Math.max(...lines.map(l=>cx.measureText(l).width));cx.fillStyle=(STY().accent||'#F2A93B');cx.fillRect(wmax/2+px*.35,-h/2,px*.18,h)}
+    lines.forEach((ln,k)=>{const ly=-h/2+lh*(k+.5);
+      if(st.words&&x.style==='karaoke'){drawKaraokeLine(x,ln,ly,tau,len,px,kBase);return}
+      if(st.neon){cx.shadowColor=(STY().accent2||'#3EF0FF');cx.shadowBlur=px*.5;cx.fillStyle='#fff';cx.fillText(ln,0,ly);cx.shadowBlur=px*.2;cx.fillText(ln,0,ly);return}
+      if(st.stroke){cx.lineJoin='round';cx.lineWidth=px*.12;cx.strokeStyle='rgba(0,0,0,.85)';cx.strokeText(ln,0,ly)}
+      if(st.shadow){cx.shadowColor='rgba(0,0,0,.6)';cx.shadowBlur=px*.25;cx.shadowOffsetY=px*.05}
+      cx.fillStyle=x.color||'#fff';cx.fillText(ln,0,ly);cx.shadowBlur=0});
+    cx.restore();
+  }
+}
+/* word-by-word: the spoken (or current) word is bright, the rest are dimmed, like the reel */
+function karTiming(x,n,len){return x.words&&x.words.length===n?x.words.map(w=>[w.t0-x.t0,w.t1-x.t0]):[...Array(n)].map((_,k)=>[len*k/n,len*(k+1)/n])}
+function karChunks(ws){const out=[];let a=0,c=0;for(let k=0;k<ws.length;k++){const L=ws[k].length;if(k>a&&(k-a>=3||c+L>17)){out.push([a,k]);a=k;c=0}c+=L+1}if(a<ws.length)out.push([a,ws.length]);return out}
+function drawKaraokeLine(x,line,ly,tau,len,px,base){
+  const all=String(x.text||'').split(/\s+/).filter(Boolean),words=line.split(/\s+/).filter(Boolean);
+  const timing=karTiming(x,all.length,len);base=base||0;
+  const sp=cx.measureText(' ').width,ws=words.map(w=>cx.measureText(w).width),tot=ws.reduce((s,v)=>s+v,0)+sp*(words.length-1);
+  let xr=tot/2;cx.textAlign='right';
+  words.forEach((w,k)=>{const [a,b]=timing[base+k]||[0,len],on=tau>=a&&tau<b+.05,past=tau>=b;cx.fillStyle=on?'#fff':past?'rgba(255,255,255,.82)':'rgba(255,255,255,.42)';cx.fillText(w,xr,ly);xr-=ws[k]+sp});
+  cx.textAlign='center';
+}
+/* ================= ripple editing: mark in/out, cut and close the gap ================= */
+function markIn(t){if(!S.plan)return;S.mark=S.mark||{};S.mark.a=clamp(t,0,S.plan.D);if(S.mark.b!=null&&S.mark.b<=S.mark.a)S.mark.b=null;drawMarks();toast('סימון התחלה · '+fmt(S.mark.a))}
+function markOut(t){if(!S.plan)return;S.mark=S.mark||{};S.mark.b=clamp(t,0,S.plan.D);if(S.mark.a!=null&&S.mark.a>=S.mark.b)S.mark.a=null;drawMarks();toast('סימון סוף · '+fmt(S.mark.b))}
+function clearMarks(){S.mark=null;drawMarks()}
+function drawMarks(){const inn=$('#tlin');if(!inn)return;let el=$('#mkR');if(!el){el=document.createElement('div');el.id='mkR';el.className='mk';inn.append(el)}
+  const m=S.mark;if(!m||!S.plan||(m.a==null&&m.b==null)){el.hidden=true;return}el.hidden=false;const a=m.a??0,b=m.b??S.plan.D;el.style.left=(a*PPS)+'px';el.style.width=Math.max(2,(b-a)*PPS)+'px';el.classList.toggle('half',m.a==null||m.b==null)}
+function shiftObjs(P,a,b){const d=b-a,mv=t=>t>=b?t-d:t>a?a:t;
+  P.texts=(P.texts||[]).map(x=>{const t0=mv(x.t0),t1=mv(x.t1);if(t1-t0<.2)return null;const y={...x,t0,t1};if(x.words)y.words=x.words.filter(w=>w.t1<=a||w.t0>=b).map(w=>({...w,t0:mv(w.t0),t1:mv(w.t1)}));return y}).filter(Boolean);
+  P.sfx=(P.sfx||[]).filter(x=>x.t<a||x.t>=b).map(x=>({...x,t:x.t>=b?x.t-d:x.t}));
+}
+function rippleCut(a,b,why){
+  const P=S.plan;if(!P)return;a=clamp(a,0,P.D);b=clamp(b,0,P.D);if(b-a<.1){toast('סמנו התחלה (I) וסוף (O) של הקטע שרוצים להוריד');return}
+  if(P.D-(b-a)<2){toast('הקליפ יהיה קצר מדי');return}
+  snapshot();const d=b-a,out=[];
+  for(const s of P.shots){
+    if(s.t1<=a+.001){out.push(s);continue}
+    if(s.t0>=b-.001){s.t0-=d;s.t1-=d;out.push(s);continue}
+    const L=a-s.t0,Rr=s.t1-b;
+    if(L<=.05&&Rr<=.05)continue;
+    if(L>.05&&Rr>.05&&s.m.kind!=='video'){s.t1-=d;out.push(s);continue}
+    if(L>.05&&Rr>.05){const r=cloneShot(s);r.id=++shotUid;r.t0=a;r.t1=a+Rr;if(s.m.kind==='video')r.vs=(s.vs||0)+(b-s.t0);r.tr={type:'cut',d:0};r.trLock=true;r.ac=true;r.role=s.role==='outro'||s.role==='end'?s.role:'';if(r.role)s.role='';s.t1=a;out.push(s,r);continue}
+    if(L>.05){s.t1=a;out.push(s);continue}
+    if(s.m.kind==='video')s.vs=(s.vs||0)+(b-s.t0);s.t0=a;s.t1=a+Rr;out.push(s);
+  }
+  for(let i=out.length-1;i>0;i--)if(out[i].t1-out[i].t0<.3){out[i-1].t1=out[i].t1;out.splice(i,1)}
+  if(out.length&&out[0].t1-out[0].t0<.3&&out.length>1){out[1].t0=0;out.shift()}
+  if(!out.length){UNDO.pop();updUndo();return}
+  out[0].t0=0;out[out.length-1].t1=P.D-d;
+  P.shots=out;P.D-=d;P.seg={...P.seg,e:P.seg.s+P.D};if(P.drop!=null&&P.drop>=P.D)P.drop=null;
+  shiftObjs(P,a,b);S.mark=null;S.sel=Math.min(shotIndex(a),P.shots.length-1);
+  commit(Math.max(0,a-.5));toast(why||`הוסר קטע של ${(d).toFixed(1)} שניות, והרווח נסגר`);
+}
+/* ================= objects on the tracks ================= */
+function addText(t,style,text){
+  const P=S.plan;if(!P)return;snapshot();P.texts=P.texts||[];const st=style||'pill';
+  const x={id:++objUid,t0:clamp(t,0,Math.max(0,P.D-.5)),t1:Math.min(P.D,t+(st==='karaoke'?3.5:2.8)),text:text||(st==='karaoke'?'כתבו כאן את מה שנאמר':'כותרת'),style:st,y:st==='bold'||st==='title'||st==='neon'?.45:st==='lower'?.82:.78,size:1,anim:'auto'};
+  P.texts.push(x);P.edited=true;S.selObj={type:'text',id:x.id};drawTracks();showInsp();renderAt(Pl.offset);markDirty();
+  setTimeout(()=>{const ta=$('#txT');if(ta){ta.focus();ta.select()}},30);
+}
+function addSfx(t,kind){const P=S.plan;if(!P)return;snapshot();P.sfx=P.sfx||[];const x={id:++objUid,t:clamp(t,0,P.D-.05),kind:kind||'whoosh',vol:.8};P.sfx.push(x);P.edited=true;S.selObj={type:'sfx',id:x.id};drawTracks();showInsp();markDirty();sfxBuffer(x.kind).then(b=>{ensureCtx();Pl.ctx.resume();const s=Pl.ctx.createBufferSource(),g=Pl.ctx.createGain();g.gain.value=.6;s.buffer=b;s.connect(g);g.connect(Pl.ctx.destination);s.start()})}
+const objOf=o=>{const P=S.plan;if(!P||!o)return null;return(o.type==='text'?P.texts:P.sfx||[]).find(x=>x.id===o.id)||null};
+function deleteObj(o){const P=S.plan,x=objOf(o);if(!x)return;snapshot();if(o.type==='text')P.texts=P.texts.filter(y=>y!==x);else P.sfx=P.sfx.filter(y=>y!==x);S.selObj=null;drawTracks();showInsp();renderAt(Pl.offset);markDirty()}
+const TRK={vy:94,vh:70,ty:0,fy:0};
+function drawTracks(){
+  const P=S.plan,inn=$('#tlin');if(!P||!inn)return;
+  const H=inn.clientHeight||168;TRK.vh=Math.max(40,H-94-58);TRK.ty=94+TRK.vh+6;TRK.fy=TRK.ty+28;
+  inn.style.setProperty('--vh',TRK.vh+'px');
+  inn.querySelectorAll('.tx,.fx,.trow').forEach(e=>e.remove());
+  for(const [cls,y,h,lab] of [['t',TRK.ty,24,'הקליקו פעמיים כדי להוסיף טקסט'],['f',TRK.fy,20,'הקליקו פעמיים כדי להוסיף סאונד']]){const r=document.createElement('div');r.className='trow '+cls;r.style.top=y+'px';r.style.height=h+'px';r.title=lab;
+    r.ondblclick=e=>{const t=(e.clientX-inn.getBoundingClientRect().left)/PPS;cls==='t'?addText(t):addSfx(t)};inn.append(r)}
+  for(const x of P.texts||[]){const el=document.createElement('div');el.className='tx'+(S.selObj&&S.selObj.type==='text'&&S.selObj.id===x.id?' sel':'');el.style.left=(x.t0*PPS)+'px';el.style.width=Math.max(8,(x.t1-x.t0)*PPS)+'px';el.style.top=TRK.ty+'px';
+    el.innerHTML='<i class="hl"></i><span></span><i class="hr"></i>';el.querySelector('span').textContent=(x.style==='karaoke'?'≋ ':'T ')+(x.text||'');el.title=(TXT_STYLES[x.style]||{}).he||'';
+    dragObj(el,x,'text');inn.append(el)}
+  for(const x of P.sfx||[]){const el=document.createElement('div');el.className='fx'+(S.selObj&&S.selObj.type==='sfx'&&S.selObj.id===x.id?' sel':'');el.style.left=(x.t*PPS)+'px';el.style.width=Math.max(14,sfxLen(x.kind)*PPS)+'px';el.style.top=TRK.fy+'px';el.textContent='♪ '+(SFX[x.kind]||x.kind);dragObj(el,x,'sfx');inn.append(el)}
+  const lab=$('#tlab');if(lab){lab.innerHTML=`<span style="top:30px" title="השיר">♫</span><span style="top:${94+TRK.vh/2-7}px" title="וידאו">V</span><span style="top:${TRK.ty+5}px" title="טקסט וכתוביות">T</span><span style="top:${TRK.fy+3}px" title="סאונד אפקטים">FX</span>`}
+  drawMarks();
+}
+function dragObj(el,x,type){
+  el.onpointerdown=e=>{
+    e.preventDefault();e.stopPropagation();pause();S.selObj={type,id:x.id};showInsp();
+    const mode=e.target.classList.contains('hl')?'l':e.target.classList.contains('hr')?'r':'m',sx=e.clientX,o0=type==='text'?[x.t0,x.t1]:[x.t],P=S.plan,w0=x.words?x.words.map(w=>({...w})):null;let moved=false;
+    el.setPointerCapture(e.pointerId);
+    const mv=ev=>{const dt=(ev.clientX-sx)/PPS;if(!moved&&Math.abs(ev.clientX-sx)<3)return;if(!moved){snapshot();moved=true}
+      if(type==='sfx'){x.t=clamp(snapBeat(o0[0]+dt,ev.altKey),0,P.D-.05)}
+      else if(mode==='m'){const L=o0[1]-o0[0];x.t0=clamp(snapBeat(o0[0]+dt,ev.altKey),0,P.D-L);x.t1=x.t0+L;if(w0){const off=x.t0-o0[0];x.words=w0.map(w=>({...w,t0:w.t0+off,t1:w.t1+off}))}}
+      else if(mode==='l')x.t0=clamp(o0[0]+dt,0,x.t1-.3);else x.t1=clamp(o0[1]+dt,x.t0+.3,P.D);
+      drawTracks();renderAt(Pl.offset)};
+    const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);if(moved){P.edited=true;markDirty()}drawTracks();showInsp()};
+    el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);
+  };
+}
+function showObjInsp(){
+  const o=S.selObj,x=objOf(o),box=$('#insp');if(!x){S.selObj=null;return false}
+  $('#inspN').textContent='';$('#h-insp').textContent=o.type==='text'?(x.style==='karaoke'?'כתוביות':'טקסט'):'סאונד אפקט';
+  if(o.type==='text'){
+    box.innerHTML=`<div class="oi"><label class="ifld">הטקסט<textarea id="txT" rows="3" maxlength="300"></textarea></label>
+      <div class="ifld"><span>סגנון</span><div class="stg">${Object.entries(TXT_STYLES).map(([k,v])=>`<button class="btn${x.style===k?' on':''}" data-st="${k}">${v.he}</button>`).join('')}</div></div>
+      <label class="ifld">אנימציה<select id="txA">${Object.entries(TXT_ANIM_HE).map(([k,v])=>`<option value="${k}"${(x.anim||'auto')===k?' selected':''}>${v}</option>`).join('')}</select></label>
+      <div class="ifld"><label for="txY">גובה במסך</label><input type="range" id="txY" min="8" max="92" value="${Math.round((x.y??.78)*100)}"></div>
+      <div class="ifld"><label for="txS">גודל</label><input type="range" id="txS" min="50" max="200" value="${Math.round((x.size||1)*100)}"></div>
+      <p class="hint">${tSpan(x.t0,x.t1)} · גוררים את הטקסט בציר הזמן כדי להזיז, ואת הקצוות כדי לקצר או להאריך</p>
+      <div class="tools"><button class="btn" id="txDup">שכפול</button><button class="btn" id="txDel">מחיקה</button><button class="btn" id="txBack">חזרה לסצנה</button></div></div>`;
+    const ta=$('#txT');ta.value=x.text||'';let sn=false;const ch=f=>{if(!sn){snapshot();sn=true}f();S.plan.edited=true;drawTracks();renderAt(Pl.offset);markDirty()};
+    ta.oninput=()=>ch(()=>{x.text=ta.value;delete x.words});
+    box.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ch(()=>{x.style=b.dataset.st});showObjInsp()});
+    $('#txA').onchange=e=>ch(()=>{x.anim=e.target.value});$('#txY').oninput=e=>ch(()=>{x.y=+e.target.value/100});$('#txS').oninput=e=>ch(()=>{x.size=+e.target.value/100});
+    $('#txDel').onclick=()=>deleteObj(o);$('#txDup').onclick=()=>{snapshot();const y={...x,id:++objUid,t0:x.t1,t1:Math.min(S.plan.D,x.t1+(x.t1-x.t0))};delete y.words;S.plan.texts.push(y);S.selObj={type:'text',id:y.id};drawTracks();showInsp();markDirty()};
+  }else{
+    box.innerHTML=`<div class="oi"><div class="ifld"><span>צליל</span><div class="stg">${Object.entries(SFX).map(([k,v])=>`<button class="btn${x.kind===k?' on':''}" data-k="${k}">${v}</button>`).join('')}</div></div>
+      <div class="ifld"><label for="fxV">עוצמה</label><input type="range" id="fxV" min="0" max="150" value="${Math.round((x.vol??.8)*100)}"></div>
+      <p class="hint">בזמן ⁦${fmt(x.t)}⁩ · גוררים בציר הזמן כדי להזיז. נצמד לביט (Alt לשחרור)</p>
+      <div class="tools"><button class="btn" id="fxPlay">השמעה</button><button class="btn" id="fxDel">מחיקה</button><button class="btn" id="txBack">חזרה לסצנה</button></div></div>`;
+    box.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{snapshot();x.kind=b.dataset.k;drawTracks();showObjInsp();markDirty();$('#fxPlay').click()});
+    $('#fxV').onchange=e=>{snapshot();x.vol=+e.target.value/100;markDirty()};$('#fxDel').onclick=()=>deleteObj(o);
+    $('#fxPlay').onclick=async()=>{ensureCtx();await Pl.ctx.resume();const s=Pl.ctx.createBufferSource(),g=Pl.ctx.createGain();s.buffer=await sfxBuffer(x.kind);g.gain.value=x.vol??.8;s.connect(g);g.connect(Pl.ctx.destination);s.start()};
+  }
+  $('#txBack').onclick=()=>{S.selObj=null;drawTracks();showInsp()};
+  return true;
+}
+/* ================= redo ================= */
+let REDO=[];
+function stateNow(){return{plan:clonePlan(S.plan),style:S.style,seed:S.seed,it:S.introTpl,ot:S.outroTpl}}
+function restoreState(u){stop();S.plan=u.plan;S.style=u.style;S.seed=u.seed;S.introTpl=u.it;S.outroTpl=u.ot;syncChoiceUI();applyLook(S.plan);vig=null;ensureCanvas();refreshUI(Pl.offset)}
+function redo(){const r=REDO.pop();if(!r)return;UNDO.push(stateNow());restoreState(r);updUndo();toast('בוצע שוב')}
 /* ================= menu bar ================= */
 function openPanel(tab){const sd=$('#side');sd.classList.add('open');if(tab)openTab(tab)}
 function closePanel(){$('#side').classList.remove('open')}
@@ -3206,14 +3424,14 @@ function saveCmd(){if(S.demo||(!S.media.length&&!S.audio)){toast('אין עדי�
 function setAspect(v){const r=document.querySelector(`input[name=aspect][value="${v}"]`);if(r&&!r.checked){r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}))}}
 function fullView(){const sc=document.querySelector('.screen');if(document.fullscreenElement)document.exitFullscreen();else if(sc.requestFullscreen)sc.requestFullscreen().catch(()=>{})}
 const ACT={new:()=>newProject(),open:()=>openProjects(),save:saveCmd,saveFile:()=>exportProject(),openFile:()=>$('#pjImport').click(),import:()=>$('#fMedia').click(),song:()=>$('#fSong').click(),export:()=>exportClip(),
-  undo:()=>undo(),make:()=>generate(),vary:()=>$('#vary').click(),split:()=>S.plan&&splitAt(Pl.offset),del:()=>S.sel>=0&&deleteShot(S.sel),prev:()=>S.sel>0&&moveShot(S.sel,-1),next:()=>S.sel>=0&&moveShot(S.sel,1),swap:()=>S.sel>=0&&replaceShot(S.sel),
+  undo:()=>undo(),redo:()=>redo(),mIn:()=>markIn(Pl.offset),mOut:()=>markOut(Pl.offset),mClr:clearMarks,ripple:()=>{const m=S.mark;if(m&&m.a!=null&&m.b!=null)rippleCut(m.a,m.b);else toast('סמנו התחלה (I) וסוף (O) של הקטע שרוצים להוריד')},rippleSc:()=>{const s=S.plan.shots[S.sel];if(s)rippleCut(s.t0,s.t1,'הסצנה נמחקה והרווח נסגר')},addTx:()=>addText(Pl.offset),addCap:()=>addText(Pl.offset,'karaoke'),addFx:()=>addSfx(Pl.offset,'whoosh'),make:()=>generate(),vary:()=>$('#vary').click(),split:()=>S.plan&&splitAt(Pl.offset),del:()=>S.sel>=0&&deleteShot(S.sel),prev:()=>S.sel>0&&moveShot(S.sel,-1),next:()=>S.sel>=0&&moveShot(S.sel,1),swap:()=>S.sel>=0&&replaceShot(S.sel),
   out:()=>{const s=S.plan&&S.plan.shots[S.sel];if(s){const b=s.m.base||s.m;b.excluded=true;S.sel=-1;rebuild();toast('הפריט הוצא, הקליפ נבנה מחדש')}},
   zin:()=>setZoom(TLZ*1.6),zout:()=>setZoom(TLZ/1.6),zfit:()=>setZoom(1),a916:()=>setAspect('9:16'),a169:()=>setAspect('16:9'),a11:()=>setAspect('1:1'),full:fullView,bin:toggleBin,
   keys:()=>{openSheet('קיצורי מקלדת','רווח: נגן/השהה · ← →: שנייה (Shift: 5 שניות) · Home/End: התחלה/סוף · S: פיצול בסמן · Delete: מחיקת סצנה · Ctrl+Z: ביטול · + − 0: זום בציר הזמן (או Ctrl+גלגלת) · F: מסך מלא · B: חומרי גלם · Ctrl+S: שמירה · Ctrl+O: פתיחת פרויקט · Ctrl+I: ייבוא · Ctrl+E: ייצוא',false);$('#shClose').textContent='סגירה';$('#shClose').onclick=closeSheet}};
-function menuState(dd){dd.querySelectorAll('[data-need]').forEach(b=>{const n=b.dataset.need;b.disabled=n==='plan'?!S.plan:n==='sel'?!(S.plan&&S.sel>=0&&S.plan.shots[S.sel]):false});const u=dd.querySelector('[data-act=undo]');if(u)u.disabled=!UNDO.length}
+function menuState(dd){dd.querySelectorAll('[data-need]').forEach(b=>{const n=b.dataset.need;b.disabled=n==='plan'?!S.plan:n==='sel'?!(S.plan&&S.sel>=0&&S.plan.shots[S.sel]):false});const u=dd.querySelector('[data-act=undo]');if(u)u.disabled=!UNDO.length;const rd=dd.querySelector('[data-act=redo]');if(rd)rd.disabled=!REDO.length}
 function closeMenus(){document.querySelectorAll('.mn.open').forEach(m=>{m.classList.remove('open');m.querySelector('.mt').setAttribute('aria-expanded','false')})}
 function openMenu(mn,focus){closeMenus();mn.classList.add('open');mn.querySelector('.mt').setAttribute('aria-expanded','true');menuState(mn.querySelector('.mdd'));if(focus){const f=mn.querySelector('.mdd button:not(:disabled)');if(f)f.focus()}}
-document.querySelectorAll('.mn').forEach(mn=>{const t=mn.querySelector('.mt');
+document.querySelectorAll('.menus .mn').forEach(mn=>{const t=mn.querySelector('.mt');
   t.onclick=e=>{e.stopPropagation();mn.classList.contains('open')?closeMenus():openMenu(mn)};
   t.onmouseenter=()=>{if(document.querySelector('.mn.open')&&!mn.classList.contains('open'))openMenu(mn)};
   t.onkeydown=e=>{if(e.key==='ArrowDown'||e.key==='Enter'){e.preventDefault();openMenu(mn,true)}};
@@ -3222,6 +3440,10 @@ document.querySelectorAll('.mn').forEach(mn=>{const t=mn.querySelector('.mt');
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.mn'))closeMenus()});
 $('#sideX').onclick=closePanel;
+$('#addTx').onclick=()=>{if(!S.plan){toast('צרו קליפ קודם');return}addText(Pl.offset)};$('#addCap').onclick=()=>{if(!S.plan){toast('צרו קליפ קודם');return}addText(Pl.offset,'karaoke')};
+$('#fxMenu').innerHTML=Object.entries(SFX).map(([k,v])=>`<button role="menuitem" data-fx="${k}"><span>${v}</span></button>`).join('');
+$('#addFx').onclick=e=>{e.stopPropagation();if(!S.plan){toast('צרו קליפ קודם');return}const mn=$('#addFx').parentElement;const op=mn.classList.contains('open');closeMenus();if(!op)mn.classList.add('open')};
+$('#fxMenu').addEventListener('click',e=>{const b=e.target.closest('[data-fx]');if(!b)return;closeMenus();addSfx(Pl.offset,b.dataset.fx)});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeMenus();if($('#side').classList.contains('open'))closePanel()}
   const typing=e.target.closest&&e.target.closest('input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,select');
@@ -3297,6 +3519,8 @@ document.addEventListener('change',e=>{
   else if(r.name==='frame'){S.frameMode=r.value;if(S.plan){snapshot();look()}}
   else if(r.name==='len'){S.len=r.value;if(S.plan)rebuild()}
   else if(r.name==='res'){S.res=+r.value}
+  else if(r.name==='fps'){S.fps=+r.value}
+  else if(r.name==='fmt'){S.fmt=r.value}
 });
 const onText=()=>{S.title=$('#title').value.trim();S.subtitle=$('#subtitle').value.trim();S.outroText=$('#outroText').value.trim();S.outroSub=$('#outroSub').value.trim();S.credits=$('#credits').value;syncPlaceholders();lookSoon()};
 ['#title','#subtitle','#outroText','#outroSub','#credits'].forEach(id=>$(id).oninput=onText);
@@ -3316,14 +3540,18 @@ const wv=$('#wave');
 wv.onpointerdown=e=>{if(!S.plan)return;const was=Pl.playing;pause();wv.setPointerCapture(e.pointerId);const r=wv.getBoundingClientRect();const go=ev=>seekTo((ev.clientX-r.left)/PPS);go(e);const up=()=>{wv.removeEventListener('pointermove',go);wv.removeEventListener('pointerup',up);if(was)play(Pl.offset)};wv.addEventListener('pointermove',go);wv.addEventListener('pointerup',up)};
 document.addEventListener('keydown',e=>{
   const tag=document.activeElement&&document.activeElement.tagName;if(/INPUT|TEXTAREA|SELECT/.test(tag)&&!(tag==='INPUT'&&/range|checkbox|radio/.test(document.activeElement.type)))return;
+  if((e.ctrlKey||e.metaKey)&&(e.key.toLowerCase()==='y'||(e.shiftKey&&e.key.toLowerCase()==='z'))){e.preventDefault();redo();return}
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();return}
   if(!S.plan)return;
   if(e.code==='Space'&&tag!=='BUTTON'){e.preventDefault();togglePlay()}
-  else if(e.key==='ArrowRight'&&tag!=='INPUT'){e.preventDefault();seekTo(Pl.offset+(e.shiftKey?5:1))}
-  else if(e.key==='ArrowLeft'&&tag!=='INPUT'){e.preventDefault();seekTo(Pl.offset-(e.shiftKey?5:1))}
+  else if(e.key==='ArrowRight'&&tag!=='INPUT'){e.preventDefault();seekTo(Pl.offset+(e.shiftKey?1:1/30))}
+  else if(e.key==='ArrowLeft'&&tag!=='INPUT'){e.preventDefault();seekTo(Pl.offset-(e.shiftKey?1:1/30))}
+  else if(e.key==='i'||e.key==='I'){e.preventDefault();markIn(Pl.offset)}
+  else if(e.key==='o'||e.key==='O'){e.preventDefault();markOut(Pl.offset)}
+  else if(e.key==='t'||e.key==='T'){e.preventDefault();addText(Pl.offset)}
   else if(e.key==='Home'){e.preventDefault();seekTo(0)}
   else if(e.key==='End'){e.preventDefault();seekTo(S.plan.D-.05)}
-  else if((e.key==='Delete'||e.key==='Backspace')&&S.sel>=0&&tag!=='INPUT'){e.preventDefault();deleteShot(S.sel)}
+  else if((e.key==='Delete'||e.key==='Backspace')&&tag!=='INPUT'){e.preventDefault();if(S.selObj)deleteObj(S.selObj);else if(e.shiftKey){if(S.mark&&S.mark.a!=null&&S.mark.b!=null)rippleCut(S.mark.a,S.mark.b);else if(S.sel>=0){const s=S.plan.shots[S.sel];rippleCut(s.t0,s.t1,'הסצנה נמחקה והרווח נסגר')}}else if(S.sel>=0)deleteShot(S.sel)}
   else if(e.key.toLowerCase()==='s'&&!e.ctrlKey&&!e.metaKey){e.preventDefault();splitAt(Pl.offset)}
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&Pl.rec)toast('הייצוא צריך שהלשונית תישאר פתוחה')});

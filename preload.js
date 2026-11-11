@@ -22,5 +22,6 @@ contextBridge.exposeInMainWorld('regaimNative', {
   updateState: () => ipcRenderer.invoke('update-state'),
   checkUpdates: () => ipcRenderer.invoke('update-check'),
   installUpdate: () => ipcRenderer.invoke('update-install'),
+  transcode: (data, to, fps) => ipcRenderer.invoke('transcode', { data, to, fps }),
   onUpdate: (cb) => { updateCb = cb; }
 });
