@@ -373,63 +373,152 @@ html,body{height:100%}
 .btn.danger{background:var(--rose);border-color:var(--rose);color:#1d0710;font-weight:600}
 .pjq{font:12px var(--mono)!important}
 @media (max-width:999px){.pjbar{order:3;flex-basis:100%;max-width:none}}
+/* ================= workspace v2: menu bar, big viewer, raw media beside the timeline ================= */
+body{margin:0}
+.app{grid-template-columns:minmax(0,1fr) clamp(270px,21vw,320px);grid-template-rows:auto minmax(0,1fr) clamp(220px,31vh,340px);grid-template-areas:"top top" "stage insp" "bot bot";gap:8px 10px;padding-block:0 8px;box-sizing:border-box;height:100vh;height:100dvh}
+.mbar{grid-area:top;display:flex;align-items:center;gap:14px;padding:4px 0;border-bottom:1px solid var(--line);margin-inline:-14px;padding-inline:14px;background:var(--panel);min-height:44px;flex-wrap:nowrap}
+.mbar .brand{flex:none}.mbar .logo{font-size:26px;line-height:1}.mbar .tag{display:none}
+.menus{display:flex;gap:2px;flex:none}
+.mn{position:relative}
+.mt{background:none;border:0;color:var(--fg);font:inherit;font-size:14px;padding:6px 11px;border-radius:7px;cursor:pointer}
+.mt:hover,.mt[aria-expanded=true]{background:var(--raise)}
+.mdd{position:absolute;top:calc(100% + 4px);right:0;z-index:40;min-width:260px;background:#1c1923;border:1px solid var(--line);border-radius:10px;padding:5px;box-shadow:0 16px 40px rgba(0,0,0,.5);display:none;flex-direction:column}
+.mn.open .mdd{display:flex}
+.mdd button{display:flex;justify-content:space-between;align-items:center;gap:18px;background:none;border:0;color:var(--fg);font:inherit;font-size:13.5px;text-align:right;padding:7px 10px;border-radius:6px;cursor:pointer}
+.mdd button:hover:not(:disabled),.mdd button:focus-visible{background:var(--raise);outline:none}
+.mdd button:disabled{color:#665e72;cursor:default}
+.mdd kbd{font:11px var(--mono);color:var(--mute);direction:ltr}
+.mdd hr{border:0;border-top:1px solid var(--line);margin:4px 2px}
+.mdd .mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:5px 10px;font-size:13px;color:var(--mute)}
+.mbar .pjbar{flex:1 1 auto;max-width:440px;margin-inline-start:auto}
+.mbar .topacts{flex:none;gap:6px}
+.btn.ico{padding:5px 11px;font-size:16px}
+.stage{gap:6px}
+.screen{border-radius:12px;background:#08070b}
+.cvw{inset:6px}
+.screen:fullscreen{border-radius:0}.screen:fullscreen .cvw{inset:0}
+.ctrl{gap:8px 12px}
+.bottom{grid-area:bot;display:grid;grid-template-columns:clamp(300px,27vw,420px) minmax(0,1fr);gap:10px;min-height:0}
+.bottom.nobin{grid-template-columns:minmax(0,1fr)}.bottom.nobin .bin{display:none}
+.bin{min-height:0;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bin.over{outline:2px dashed var(--amber);outline-offset:-4px}
+.binh{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);flex:none}
+.binh h3{margin:0;font-size:15px;font-weight:600}.binh .mcount{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.binh .drop{flex:none;padding:5px 12px;font-size:13px;cursor:pointer;border-style:solid}
+.bin .pm{padding:8px 10px;gap:8px}
+.bin .song{padding:6px 8px;gap:8px}.bin .song svg{width:26px;height:26px}.bin .song .sn b{font-size:13px}.bin .song .sn span{font-size:11px}
+.bin .mbox{flex:1 1 auto;min-height:60px}
+.bin .mgrid{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
+.bin .log{max-height:22px;overflow:hidden;font-size:11.5px;flex:none}.bin .log li:not(:last-child){display:none}
+.bin .pfoot{display:none}
+.binh #go2{flex:none;padding:5px 12px;font-size:13px}
+.bin .song{flex:none}.bin .song .sn{display:flex;flex-direction:row;gap:8px;align-items:baseline;min-width:0}.bin .song .sn b,.bin .song .sn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timeline .tlin{height:100%;min-height:150px}.timeline .sh,.timeline .hd{height:calc(100% - 100px);min-height:56px}
+.bin .pfoot{margin:0 -10px -8px;padding:6px 10px 8px}
+.bin .pfoot .primary{padding:9px;font-size:15px}
+.timeline{grid-area:auto;display:flex;flex-direction:column;min-height:0;border-radius:12px;padding:6px 10px 4px}
+.timeline .tl{flex:1;min-height:0;overflow-y:hidden}
+.tlh{flex:none;margin-bottom:2px;gap:8px}.tlh h3{font-size:16px;font-family:var(--body);font-weight:600}
+.side{grid-area:auto;position:fixed;top:52px;bottom:12px;left:12px;width:min(400px,calc(100vw - 24px));z-index:30;box-shadow:0 24px 60px rgba(0,0,0,.55);display:none}
+.side.open{display:flex}
+.sdh{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 0;flex:none}.sdh b{font-size:15px}.sdh .x{background:none;border:0;color:var(--mute);font-size:24px;line-height:1;cursor:pointer;padding:0 6px}
+.tabs{grid-template-columns:repeat(5,minmax(0,1fr))}
+.inspc{border-radius:12px;padding:10px}
+.ihead h3{font-size:18px;font-family:var(--body);font-weight:600}
+/* timeline scenes: numbered, clearly framed, easy to pick */
+.sh{top:94px;height:70px;border:2px solid rgba(255,255,255,.14);border-radius:7px}
+.sh:hover{border-color:rgba(255,255,255,.4)}
+.sh.sel{border-color:var(--amber);outline:0;box-shadow:0 0 0 2px rgba(242,169,59,.35),0 6px 18px rgba(0,0,0,.4)}
+.sh .no{position:absolute;right:3px;top:3px;z-index:1;font:600 10px var(--mono);background:rgba(14,12,18,.85);color:var(--fg);border-radius:4px;padding:0 5px;line-height:15px}
+.sh.sel .no{background:var(--amber);color:var(--amber-ink)}
+.sh .du{position:absolute;left:4px;bottom:3px;z-index:1;font:500 9.5px var(--mono);color:#fff;text-shadow:0 1px 2px #000}
+.sh .tm{top:22px}
+.tlin{height:168px}
+.hd{top:94px;height:70px}
+@media (max-width:999px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"top" "stage" "insp" "bot";height:auto;min-height:100dvh}
+  .timeline .tlin{height:172px}.timeline .tl{flex:none}
+  .mbar{flex-wrap:wrap;gap:6px 10px}.mbar .pjbar{order:3;flex-basis:100%;max-width:none;margin:0}
+  .bottom{grid-template-columns:minmax(0,1fr)}
+  .bin{max-height:none}.bin .mbox{max-height:280px}
+  .side{top:auto;left:0;right:0;bottom:0;width:auto;max-height:85vh;border-radius:16px 16px 0 0}
+  .mdd{right:auto;left:0}
+  .menus .mn:nth-child(n+4) .mdd{left:auto;right:0}
+}
 </style>
 
 <div class="app" dir="rtl">
-  <header class="top">
-    <div class="brand"><div class="logo">רגעים<i>.</i></div><div class="tag">תמונות ושיר נכנסים, קליפ מסונכרן לקצב יוצא</div></div>
-    <div class="pjbar"><input id="pjName" maxlength="40" placeholder="פרויקט חדש" aria-label="שם הפרויקט"><span class="svs" id="saveSt" aria-live="polite"></span><button class="btn" id="pjOpen">פרויקטים</button></div>
+  <header class="top mbar">
+    <div class="brand"><div class="logo">רגעים<i>.</i></div></div>
+    <nav class="menus" role="menubar" aria-label="תפריט ראשי">
+      <div class="mn"><button class="mt" role="menuitem" aria-haspopup="true" aria-expanded="false">קובץ</button><div class="mdd" role="menu" id="m-file">
+        <button role="menuitem" data-act="new"><span>פרויקט חדש</span></button>
+        <button role="menuitem" data-act="open"><span>פתיחת פרויקט…</span><kbd>Ctrl+O</kbd></button>
+        <button role="menuitem" data-act="save"><span>שמירה</span><kbd>Ctrl+S</kbd></button>
+        <hr>
+        <button role="menuitem" data-act="saveFile"><span>שמירה לקובץ פרויקט…</span></button>
+        <button role="menuitem" data-act="openFile"><span>פתיחת קובץ פרויקט…</span></button>
+        <hr>
+        <button role="menuitem" data-act="import"><span>ייבוא תמונות וסרטונים…</span><kbd>Ctrl+I</kbd></button>
+        <button role="menuitem" data-act="song"><span>בחירת שיר…</span></button>
+        <hr>
+        <button role="menuitem" data-act="export" data-need="plan"><span>ייצוא וידאו…</span><kbd>Ctrl+E</kbd></button>
+        <div class="mrow"><span>איכות ייצוא</span><div class="seg" role="radiogroup" aria-label="איכות ייצוא"><label><input type="radio" name="res" value="720" checked><span>720p</span></label><label><input type="radio" name="res" value="1080"><span>1080p</span></label></div></div>
+      </div></div>
+      <div class="mn"><button class="mt" role="menuitem" aria-haspopup="true" aria-expanded="false">עריכה</button><div class="mdd" role="menu" id="m-edit">
+        <button role="menuitem" data-act="undo"><span>ביטול</span><kbd>Ctrl+Z</kbd></button>
+        <hr>
+        <button role="menuitem" data-act="make"><span>יצירת הקליפ מחדש</span></button>
+        <button role="menuitem" data-act="vary" data-need="plan"><span>וריאציה: אותו חומר, חיתוך אחר</span></button>
+        <hr>
+        <button role="menuitem" data-act="split" data-need="plan"><span>פיצול בסמן</span><kbd>S</kbd></button>
+        <button role="menuitem" data-act="del" data-need="sel"><span>מחיקת הסצנה</span><kbd>Delete</kbd></button>
+        <button role="menuitem" data-act="prev" data-need="sel"><span>הזזת הסצנה מוקדם יותר</span></button>
+        <button role="menuitem" data-act="next" data-need="sel"><span>הזזת הסצנה מאוחר יותר</span></button>
+        <button role="menuitem" data-act="swap" data-need="sel"><span>החלפת החומר בסצנה</span></button>
+        <button role="menuitem" data-act="out" data-need="sel"><span>הוצאת הפריט מהקליפ</span></button>
+      </div></div>
+      <div class="mn"><button class="mt" role="menuitem" aria-haspopup="true" aria-expanded="false">תצוגה</button><div class="mdd" role="menu" id="m-view">
+        <button role="menuitem" data-act="zin" data-need="plan"><span>הגדלת ציר הזמן</span><kbd>+</kbd></button>
+        <button role="menuitem" data-act="zout" data-need="plan"><span>הקטנת ציר הזמן</span><kbd>−</kbd></button>
+        <button role="menuitem" data-act="zfit" data-need="plan"><span>כל הקליפ בציר הזמן</span><kbd>0</kbd></button>
+        <hr>
+        <button role="menuitem" data-act="a916"><span>פורמט 9:16 (לאורך)</span></button>
+        <button role="menuitem" data-act="a169"><span>פורמט 16:9 (לרוחב)</span></button>
+        <button role="menuitem" data-act="a11"><span>פורמט 1:1 (ריבוע)</span></button>
+        <hr>
+        <button role="menuitem" data-act="full" data-need="plan"><span>נגן במסך מלא</span><kbd>F</kbd></button>
+        <button role="menuitem" data-act="bin"><span>הצגה או הסתרה של חומרי הגלם</span><kbd>B</kbd></button>
+      </div></div>
+      <div class="mn"><button class="mt" role="menuitem" aria-haspopup="true" aria-expanded="false">קליפ</button><div class="mdd" role="menu" id="m-clip">
+        <button role="menuitem" data-act="p:t-style"><span>סגנון, פורמט, אורך ומעברים…</span></button>
+        <button role="menuitem" data-act="p:t-io"><span>פתיח וסיום…</span></button>
+        <button role="menuitem" data-act="p:t-music"><span>מוזיקה וסאונד…</span></button>
+        <button role="menuitem" data-act="p:t-focus"><span>מושא: אדם או חפץ במרכז…</span></button>
+        <button role="menuitem" data-act="p:t-ex"><span>עריכות לדוגמה…</span></button>
+      </div></div>
+      <div class="mn"><button class="mt" role="menuitem" aria-haspopup="true" aria-expanded="false">עזרה</button><div class="mdd" role="menu" id="m-help">
+        <button role="menuitem" data-act="keys"><span>קיצורי מקלדת</span></button>
+      </div></div>
+    </nav>
+    <div class="pjbar"><input id="pjName" maxlength="40" placeholder="פרויקט חדש" aria-label="שם הפרויקט"><span class="svs" id="saveSt" aria-live="polite"></span><button class="btn" id="pjOpen" hidden>פרויקטים</button></div>
     <div class="topacts">
-      <button class="btn" id="undo" disabled title="ביטול הפעולה האחרונה (Ctrl+Z)">↶ ביטול</button>
-      <button class="btn" id="vary" title="אותו חומר, חיתוך אחר">וריאציה</button>
-      <div class="exp">
-          <div class="seg" role="radiogroup" aria-label="איכות ייצוא">
-            <label><input type="radio" name="res" value="720" checked><span>720p</span></label>
-            <label><input type="radio" name="res" value="1080"><span>1080p</span></label>
-          </div>
-          <button class="btn hot" id="exportBtn">ייצוא וידאו</button>
-        </div>
+      <button class="btn ico" id="undo" disabled title="ביטול (Ctrl+Z)" aria-label="ביטול">↶</button>
+      <button class="btn" id="vary" hidden>וריאציה</button>
+      <button class="btn hot" id="exportBtn">ייצוא וידאו</button>
     </div>
   </header>
 
-  <aside class="side" aria-label="כלים">
+  <aside class="side" id="side" aria-label="הגדרות הקליפ">
+    <div class="sdh"><b>הגדרות הקליפ</b><button class="x" id="sideX" aria-label="סגירה">×</button></div>
     <div class="tabs" role="tablist" aria-label="כלים">
-      <button type="button" role="tab" id="t-media" aria-controls="p-media" aria-selected="true">חומרים</button>
-      <button type="button" role="tab" id="t-focus" aria-controls="p-focus" aria-selected="false" tabindex="-1">מושא</button>
+      <button type="button" role="tab" id="t-focus" aria-controls="p-focus" aria-selected="true">מושא</button>
       <button type="button" role="tab" id="t-style" aria-controls="p-style" aria-selected="false" tabindex="-1">סגנון</button>
       <button type="button" role="tab" id="t-io" aria-controls="p-io" aria-selected="false" tabindex="-1">פתיח וסיום</button>
       <button type="button" role="tab" id="t-music" aria-controls="p-music" aria-selected="false" tabindex="-1">מוזיקה</button>
       <button type="button" role="tab" id="t-ex" aria-controls="p-ex" aria-selected="false" tabindex="-1">דוגמאות</button>
     </div>
-    <section class="pane pm" role="tabpanel" id="p-media" aria-labelledby="t-media">
-      <label class="drop" id="dropZone">
-          <input class="vh" type="file" id="fMedia" multiple accept="image/*,video/*,.json">
-          <strong>גררו לכאן תמונות וסרטונים</strong>
-          <span>או לחצו לבחירה מהמכשיר</span>
-          <small>JPG · PNG · WEBP · MP4 · MOV · HEVC</small>
-        </label>
-      <label class="song" id="songRow">
-          <input class="vh" type="file" id="fSong" accept="audio/*,video/*">
-          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="17" fill="#332D3C"/><path d="M14 22.5V11.5l9-2v10.8" stroke="#F2A93B" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12.2" cy="22.6" r="2.2" fill="#F2A93B"/><circle cx="21.2" cy="20.4" r="2.2" fill="#F2A93B"/></svg>
-          <span class="sn"><b id="songName">בחרו שיר</b><span id="songMeta">MP3 · M4A · או סרטון עם פסקול</span></span>
-        </label>
-      <details class="links">
-          <summary>יש לכם קישור מגוגל תמונות או מיוטיוב?</summary>
-          <p>קבלת קישורים ישירה תגיע בשלב השרת. בינתיים: באלבום בגוגל תמונות פותחים את התפריט (⋮) ובוחרים "הורדת הכול", ואז גוררים את הקבצים לכאן. לשיר, בחרו קובץ אודיו מהמכשיר.</p>
-        </details>
-      <div class="conv" id="convBox" hidden aria-live="polite">
-          <b id="convT"></b>
-          <p id="convS"></p>
-          <div class="bar"><i id="convBar"></i></div>
-          <div class="acts"><button class="btn" id="convRetry" hidden>נסו שוב</button><button class="btn" id="convX">ביטול</button></div>
-        </div>
-      <div class="mhead"><span class="lbl">החומרים שלכם <small class="lsm">לפי זמן צילום</small></span><span class="mcount" id="mcount"></span></div>
-      <div class="learn" id="learnSt" hidden aria-live="polite"></div>
-      <div class="mbox"><div class="mgrid" id="mgrid" aria-label="החומרים שהועלו"></div></div>
-      <ul class="log" id="log" aria-live="polite"></ul>
-      <div class="pfoot"><button class="primary" id="go">צרו קליפ</button></div>
-    </section>
-    <section class="pane" role="tabpanel" id="p-focus" aria-labelledby="t-focus" hidden>
+    <section class="pane" role="tabpanel" id="p-focus" aria-labelledby="t-focus">
       <p class="hint" id="pplHint">אחרי יצירת הקליפ יופיעו כאן האנשים שזוהו. בחרו אחד, והמצלמה תעקוב אחריו לאורך כל הקליפ.</p>
         <p class="hint">אפשר גם ללחוץ על סצנה בציר הזמן, ואז על אדם או חפץ בתמונה.</p>
         <div class="people" id="people"></div>
@@ -535,18 +624,44 @@ html,body{height:100%}
     <div id="insp"><p class="hint">אחרי יצירת הקליפ יופיעו כאן כלי העריכה של הסצנה שמול הנגן.</p></div>
   </aside>
 
+  <div class="bottom">
+  <aside class="bin" id="bin" aria-label="חומרי גלם">
+    <div class="binh"><h3>חומרי גלם</h3><span class="mcount" id="mcount"></span>
+      <button class="btn hot" id="go2" title="יצירת הקליפ מהחומרים והשיר">צרו קליפ</button>
+      <label class="btn drop" id="dropZone" title="או גררו קבצים לכאן"><input class="vh" type="file" id="fMedia" multiple accept="image/*,video/*,.json">+ ייבוא</label>
+    </div>
+    <section class="pane pm" id="p-media">
+
+      <label class="song" id="songRow">
+          <input class="vh" type="file" id="fSong" accept="audio/*,video/*">
+          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="17" fill="#332D3C"/><path d="M14 22.5V11.5l9-2v10.8" stroke="#F2A93B" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12.2" cy="22.6" r="2.2" fill="#F2A93B"/><circle cx="21.2" cy="20.4" r="2.2" fill="#F2A93B"/></svg>
+          <span class="sn"><b id="songName">בחרו שיר</b><span id="songMeta">MP3 · M4A · או סרטון עם פסקול</span></span>
+        </label>
+
+      <div class="conv" id="convBox" hidden aria-live="polite">
+          <b id="convT"></b>
+          <p id="convS"></p>
+          <div class="bar"><i id="convBar"></i></div>
+          <div class="acts"><button class="btn" id="convRetry" hidden>נסו שוב</button><button class="btn" id="convX">ביטול</button></div>
+        </div>
+      
+      <div class="learn" id="learnSt" hidden aria-live="polite"></div>
+      <div class="mbox"><div class="mgrid" id="mgrid" aria-label="החומרים שהועלו"></div></div>
+      <ul class="log" id="log" aria-live="polite"></ul>
+      <div class="pfoot"><button class="primary" id="go">צרו קליפ</button></div>
+    </section>
+  </aside>
   <section class="timeline" aria-labelledby="h-tl">
     <div class="tlh">
       <h3 id="h-tl">ציר זמן</h3><div class="chips" id="chips"></div>
-      <span class="hint">גררו את הקווים בין הסצנות כדי לקצר או להאריך. הם נצמדים לביט.</span>
       <div class="tlctl">
         <label class="tlv" title="הקול המקורי של כל הסרטונים בקליפ"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><span>קול הסרטונים</span><input type="range" id="tlVol" min="0" max="100" value="35" aria-label="עוצמת הקול המקורי בכל הקליפ"><output id="tlVolO">35%</output></label>
         <div class="tlz" role="group" aria-label="זום ציר הזמן"><button class="btn" id="tlZout" title="הקטנה (Ctrl + גלגלת, או מקש -)" aria-label="הקטנת ציר הזמן">−</button><button class="btn" id="tlZfit" title="כל הקליפ בתצוגה (מקש 0)">הכול</button><button class="btn" id="tlZin" title="הגדלה (Ctrl + גלגלת, או מקש +)" aria-label="הגדלת ציר הזמן">+</button><output id="tlZo">×1</output></div>
       </div>
-      <div class="legend"><span><i style="background:var(--mute)"></i>ביט</span><span><i style="background:var(--rose)"></i>בס</span><span><i style="background:var(--amber)"></i>תופים וקול</span><span><i style="background:var(--teal)"></i>גבוהים</span><span><i style="background:#fff"></i>דרופ</span></div>
     </div>
     <div class="tl" id="tl" dir="ltr"><div class="tlin" id="tlin"><canvas id="wave"></canvas><div id="strip"></div><div class="ph" id="ph"></div></div></div>
   </section>
+  </div>
 </div>
 
 <div class="sheet" id="sheet" hidden dir="rtl" role="dialog" aria-modal="true" aria-labelledby="shT">
@@ -2366,7 +2481,8 @@ function syncVideos(t,playing){
 }
 function seekTo(t){if(!S.plan)return;t=clamp(t,0,S.plan.D-.02);if(Pl.playing){play(t);return}Pl.offset=t;syncVideos(t,false);renderAt(t);updatePlayhead(t);followSel(t)}
 /* the scene tools always show the scene in front of the player */
-function followSel(t){const P=S.plan;if(!P||!P.shots.length)return;const i=shotIndex(t);if(i===S.sel)return;S.sel=i;showInsp();STRIP.forEach((o,k)=>o.b.classList.toggle('sel',k===i))}
+function followSel(t){const P=S.plan;if(!P||!P.shots.length)return;const i=shotIndex(t);if(i===S.sel)return;S.sel=i;showInsp();STRIP.forEach((o,k)=>o.b.classList.toggle('sel',k===i));shotIntoView(i)}
+function shotIntoView(i){const P=S.plan,tl=$('#tl');if(!P||!P.shots[i]||Pl.playing)return;const a=P.shots[i].t0*PPS,b=P.shots[i].t1*PPS;if(a<tl.scrollLeft||b>tl.scrollLeft+tl.clientWidth)tl.scrollLeft=Math.max(0,(a+b)/2-tl.clientWidth/2)}
 function jumpShot(dir){
   const P=S.plan;if(!P)return;const t=Pl.offset,i=shotIndex(t);
   if(dir<0){const s=P.shots[i];seekTo(t-s.t0>.4||i===0?s.t0+.01:P.shots[i-1].t0+.01)}
@@ -2400,6 +2516,7 @@ function drawTimeline(){
     const b=document.createElement('button');b.className='sh'+(s.role==='hero'?' hero':'')+(i===S.sel?' sel':'');
     const th=s.role==='outro'&&P.outro.tpl==='collage'&&P.outro.tiles&&P.outro.tiles[0]?P.outro.tiles[0].thumb:s.m.thumb;b.style.backgroundImage=`url(${th})`;
     b.title=(s.m.ai&&s.m.ai.desc||s.m.name)+' · '+TR_HE[s.tr.type];b.setAttribute('aria-label',`סצנה ${i+1}: ${b.title}`);
+    {const no=document.createElement('span');no.className='no';no.textContent=i+1;b.append(no);const du=document.createElement('span');du.className='du';du.textContent=(s.t1-s.t0).toFixed(1)+'″';b.append(du)}
     if(i>0&&s.tr.type!=='cut'){const g=document.createElement('span');g.className='tr'+(s.trLock?' lk':s.tr.type==='flash'||s.isDrop?' f':'');g.textContent=TR_GL[s.tr.type]||'·';b.append(g)}
     if(s.role==='intro'||s.role==='outro'){const g=document.createElement('span');g.className='rl';g.textContent=s.role==='intro'?'פתיח':'סיום';b.append(g)}
     if(S.target&&hasTarget(s.m)){const g=document.createElement('span');g.className='tm';g.textContent='◎';g.title='המושא בסצנה';b.append(g)}
@@ -2446,6 +2563,7 @@ function reasonOf(s){
 }
 const CAM_HE={push:'מתקרבת',pull:'מתרחקת',pan:'פאן',drift:'כמעט נייחת',fit:'תמונה מלאה על רקע מטושטש',video:'וידאו',track:'עוקבת'};
 function showInsp(){
+  try{STRIP.forEach((o,k)=>o.b.classList.toggle('sel',k===S.sel))}catch(e){}
   const P=S.plan,i=S.sel,box=$('#insp');$('#inspN').textContent=P&&i>=0&&P.shots[i]?`${i+1} מתוך ${P.shots.length}`:'';
   if(!P||i<0||!P.shots[i]){box.innerHTML=`<p class="hint">${P?'עצרו את הנגן או לחצו על סצנה בציר הזמן כדי לערוך אותה.':'אחרי יצירת הקליפ יופיעו כאן כלי העריכה של הסצנה שמול הנגן.'}</p>`;return}
   const s=P.shots[i],m=s.m,b=m.base||m,a=m.ai,sub=subjectOf(m),vid=m.kind==='video';
@@ -2716,7 +2834,7 @@ async function generate(){
   if(CONV.busy){toast('מחכים שההמרה תסתיים');return}
   if(!S.media.length){toast('הוסיפו תמונות או סרטונים');return}
   if(!S.audio){$('#songRow').classList.add('need');toast('בחרו שיר לקליפ');return}
-  const go=$('#go');go.disabled=true;stop();clearLog();
+  const go=$('#go');go.disabled=true;$('#go2').disabled=true;stop();clearLog();
   try{
     if(!S.A){setBusy('מקשיב לשיר',.1,'קצב, תיבות, בס, תופים ודרופ');await tick();S.A=await analyzeAudio(S.audio.buffer);$('#songMeta').textContent=`${fmt(S.audio.buffer.duration)} · ${Math.round(S.A.bpm)} BPM`}
     log(`קצב ${Math.round(S.A.bpm)} BPM · ${S.A.kicks.length} מכות בס · ${S.A.snares.length} מכות תוף · ${S.A.sections.length} קטעים בשיר`);
@@ -2750,7 +2868,7 @@ async function generate(){
     const P=S.plan;
     if(P){log(`${P.shots.length} סצנות על ${fmt(P.D)}, בלי חזרות על אותו קטע · `+(P.drop!=null?`רגע השיא נחת על הדרופ ב-${fmt(P.drop)}`:'בלי דרופ ברור: השיא בקטע החזק'));if(P.note==='merged')log('מעט חומרים לאורך הזה: הסצנות ארוכות יותר במקום לחזור על חומר. אפשר להוסיף חומרים או לבחור אורך קצר יותר','warn');toast('הקליפ מוכן. לחצו נגן')}
   }catch(e){console.error(e);log('שגיאה: '+(e&&e.message||e),'warn');toast('משהו נכשל ביצירה. הפרטים ברשימה')}
-  finally{hideBusy();go.disabled=false}
+  finally{hideBusy();go.disabled=false;$('#go2').disabled=false}
 }
 
 /* ================= export ================= */
@@ -3079,6 +3197,39 @@ document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('#ti
 window.addEventListener('pagehide',()=>{if(PJ.dirty)saveNow()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&PJ.dirty)saveNow()});
 
+
+/* ================= menu bar ================= */
+function openPanel(tab){const sd=$('#side');sd.classList.add('open');if(tab)openTab(tab)}
+function closePanel(){$('#side').classList.remove('open')}
+function toggleBin(){const b=document.querySelector('.bottom');b.classList.toggle('nobin');try{localStorage.setItem('rg-nobin',b.classList.contains('nobin')?'1':'')}catch(e){}if(S.plan){drawTimeline();updatePlayhead(Pl.offset)}}
+function saveCmd(){if(S.demo||(!S.media.length&&!S.audio)){toast('אין עדיין מה לשמור');return}PJ.dirty=true;saveNow().then(()=>toast('נשמר'))}
+function setAspect(v){const r=document.querySelector(`input[name=aspect][value="${v}"]`);if(r&&!r.checked){r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}))}}
+function fullView(){const sc=document.querySelector('.screen');if(document.fullscreenElement)document.exitFullscreen();else if(sc.requestFullscreen)sc.requestFullscreen().catch(()=>{})}
+const ACT={new:()=>newProject(),open:()=>openProjects(),save:saveCmd,saveFile:()=>exportProject(),openFile:()=>$('#pjImport').click(),import:()=>$('#fMedia').click(),song:()=>$('#fSong').click(),export:()=>exportClip(),
+  undo:()=>undo(),make:()=>generate(),vary:()=>$('#vary').click(),split:()=>S.plan&&splitAt(Pl.offset),del:()=>S.sel>=0&&deleteShot(S.sel),prev:()=>S.sel>0&&moveShot(S.sel,-1),next:()=>S.sel>=0&&moveShot(S.sel,1),swap:()=>S.sel>=0&&replaceShot(S.sel),
+  out:()=>{const s=S.plan&&S.plan.shots[S.sel];if(s){const b=s.m.base||s.m;b.excluded=true;S.sel=-1;rebuild();toast('הפריט הוצא, הקליפ נבנה מחדש')}},
+  zin:()=>setZoom(TLZ*1.6),zout:()=>setZoom(TLZ/1.6),zfit:()=>setZoom(1),a916:()=>setAspect('9:16'),a169:()=>setAspect('16:9'),a11:()=>setAspect('1:1'),full:fullView,bin:toggleBin,
+  keys:()=>{openSheet('קיצורי מקלדת','רווח: נגן/השהה · ← →: שנייה (Shift: 5 שניות) · Home/End: התחלה/סוף · S: פיצול בסמן · Delete: מחיקת סצנה · Ctrl+Z: ביטול · + − 0: זום בציר הזמן (או Ctrl+גלגלת) · F: מסך מלא · B: חומרי גלם · Ctrl+S: שמירה · Ctrl+O: פתיחת פרויקט · Ctrl+I: ייבוא · Ctrl+E: ייצוא',false);$('#shClose').textContent='סגירה';$('#shClose').onclick=closeSheet}};
+function menuState(dd){dd.querySelectorAll('[data-need]').forEach(b=>{const n=b.dataset.need;b.disabled=n==='plan'?!S.plan:n==='sel'?!(S.plan&&S.sel>=0&&S.plan.shots[S.sel]):false});const u=dd.querySelector('[data-act=undo]');if(u)u.disabled=!UNDO.length}
+function closeMenus(){document.querySelectorAll('.mn.open').forEach(m=>{m.classList.remove('open');m.querySelector('.mt').setAttribute('aria-expanded','false')})}
+function openMenu(mn,focus){closeMenus();mn.classList.add('open');mn.querySelector('.mt').setAttribute('aria-expanded','true');menuState(mn.querySelector('.mdd'));if(focus){const f=mn.querySelector('.mdd button:not(:disabled)');if(f)f.focus()}}
+document.querySelectorAll('.mn').forEach(mn=>{const t=mn.querySelector('.mt');
+  t.onclick=e=>{e.stopPropagation();mn.classList.contains('open')?closeMenus():openMenu(mn)};
+  t.onmouseenter=()=>{if(document.querySelector('.mn.open')&&!mn.classList.contains('open'))openMenu(mn)};
+  t.onkeydown=e=>{if(e.key==='ArrowDown'||e.key==='Enter'){e.preventDefault();openMenu(mn,true)}};
+  mn.querySelector('.mdd').addEventListener('click',e=>{const b=e.target.closest('button[data-act]');if(!b||b.disabled)return;closeMenus();const a=b.dataset.act;if(a.startsWith('p:'))openPanel(a.slice(2));else if(ACT[a])ACT[a]()});
+  mn.querySelector('.mdd').addEventListener('keydown',e=>{const items=[...mn.querySelectorAll('.mdd button:not(:disabled)')],k=items.indexOf(document.activeElement);if(e.key==='ArrowDown'){e.preventDefault();(items[k+1]||items[0]).focus()}else if(e.key==='ArrowUp'){e.preventDefault();(items[k-1]||items[items.length-1]).focus()}else if(e.key==='Escape'){closeMenus();t.focus()}});
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.mn'))closeMenus()});
+$('#sideX').onclick=closePanel;
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeMenus();if($('#side').classList.contains('open'))closePanel()}
+  const typing=e.target.closest&&e.target.closest('input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,select');
+  if(e.ctrlKey||e.metaKey){const k=e.key.toLowerCase();if(k==='o'){e.preventDefault();openProjects()}else if(k==='i'){e.preventDefault();$('#fMedia').click()}else if(k==='e'){e.preventDefault();if(S.plan)exportClip()}return}
+  if(typing||e.altKey)return;if(e.key==='f'||e.key==='F'){if(S.plan){e.preventDefault();fullView()}}else if(e.key==='b'||e.key==='B'){e.preventDefault();toggleBin()}
+});
+try{if(localStorage.getItem('rg-nobin'))document.querySelector('.bottom').classList.add('nobin')}catch(e){}
+document.addEventListener('fullscreenchange',()=>{setTimeout(()=>{if(S.plan)renderAt(Pl.offset)},60)});
 /* ================= wiring ================= */
 function buildChoiceUI(){
   $('#styles').innerHTML=Object.entries(STYLES).map(([k,s])=>`<label class="sty"><input type="radio" name="style" value="${k}"${k===S.style?' checked':''}><span><i style="background:${s.sw}"></i><b>${s.he}</b><em>${s.desc}</em></span></label>`).join('');
@@ -3093,12 +3244,12 @@ $('#fIntro').onchange=e=>{setEdgeMedia('intro',e.target.files[0]);e.target.value
 $('#fOutro').onchange=e=>{setEdgeMedia('outro',e.target.files[0]);e.target.value=''};
 $('#convX').onclick=async()=>{if(CONV.busy){CONV.cancel=true;CONV.queue.length=0;try{CONV.ff&&CONV.ff.terminate()}catch(e){}CONV.ff=null;CONV.loading=null}else{$('#convBox').hidden=true;CONV.failed=[]}};
 $('#convRetry').onclick=()=>{CONV.queue.push(...CONV.failed.splice(0));runConversion()};
-const dz=$('#dropZone');
+const dz=$('#bin');
 ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
 dz.addEventListener('drop',e=>{const fs=[...e.dataTransfer.files];const au=fs.find(f=>f.type.startsWith('audio'));if(au)setSong(au);addFiles(fs.filter(f=>!f.type.startsWith('audio')))});
 $('#demoUp').onclick=()=>$('#fMedia').click();
-$('#go').onclick=generate;
+$('#go').onclick=generate;$('#go2').onclick=generate;
 $('#play').onclick=togglePlay;
 cv.onclick=togglePlay;
 $('#toStart').onclick=()=>seekTo(0);

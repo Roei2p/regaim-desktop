@@ -57,10 +57,17 @@
     .dk .ok{color:var(--ok)}.dk .mut{color:var(--mute);font-size:13px}.dk h4{margin:6px 0 0;font-size:15px}`;
     document.head.append(css);
     const b = document.createElement('button'); b.className = 'btn'; b.id = 'dkSet'; b.textContent = 'הגדרות';
+    const help = document.getElementById('m-help');
+    if (help) b.hidden = true;
     acts.prepend(b);
     // always-visible update button: checks, shows progress, installs when ready
     const ub = document.createElement('button'); ub.className = 'btn'; ub.id = 'dkUpd'; ub.textContent = 'בדיקת עדכונים';
     acts.prepend(ub);
+    // the same actions in the Help menu
+    if (help) {
+      const mk = (t, f) => { const x = document.createElement('button'); x.setAttribute('role', 'menuitem'); x.innerHTML = '<span></span>'; x.firstChild.textContent = t; x.onclick = () => { if (window.closeMenus) closeMenus(); f(); }; return x; };
+      help.append(document.createElement('hr'), mk('בדיקת עדכונים', () => ub.click()), mk('הגדרות ומפתח Claude…', () => b.click()));
+    }
     let last = { status: 'idle' };
     const paint = (s) => {
       last = s || last; const st = last.status;
